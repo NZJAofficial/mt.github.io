@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>ForestTrack AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#171512;
+  --bg-elev:#211e19;
+  --bg-card:#28241d;
+  --bg-card-hi:#332e24;
+  --line:#3a352a;
+  --pine:#3c6b4a;
+  --pine-hi:#4f8a61;
+  --amber:#e8871e;
+  --amber-hi:#ffa23f;
+  --text:#f3ede1;
+  --text-dim:#b6ad9a;
+  --text-faint:#7e7563;
+  --danger:#c1443d;
+  --gold:#d8b34a;
+  --silver:#b8bcc4;
+  --bronze:#c47a45;
+  --radius:14px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse at top, rgba(60,107,74,0.14), transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:'Barlow',system-ui,sans-serif;
+  min-height:100vh;
+  overscroll-behavior-y:none;
+}
+h1,h2,h3,.disp{font-family:'Barlow Condensed',system-ui,sans-serif; text-transform:uppercase; letter-spacing:0.02em; font-weight:800; margin:0;}
+#app{max-width:520px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column; position:relative;}
+#screen{flex:1; padding:18px 16px calc(96px + var(--safe-b)); overflow-y:auto;}
+.topbar{
+  position:sticky; top:0; z-index:5;
+  background:linear-gradient(180deg, var(--bg) 70%, transparent);
+  padding:16px 16px 10px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.eyebrow{font-size:11px; letter-spacing:0.14em; color:var(--amber); text-transform:uppercase; font-weight:700;}
+.pagetitle{font-size:28px; line-height:1.05; margin-top:2px;}
+.card{background:var(--bg-card); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-bottom:14px;}
+.card.hi{background:var(--bg-card-hi);}
+.row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.stack{display:flex; flex-direction:column; gap:14px;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;}
+.statbox{background:var(--bg-elev); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center;}
+.statbox .num{font-family:'Barlow Condensed'; font-weight:800; font-size:24px; color:var(--amber-hi);}
+.statbox .lbl{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; margin-top:2px;}
+label{font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; font-weight:600; display:block; margin-bottom:6px;}
+input,select,textarea{
+  width:100%; background:var(--bg-elev); border:1px solid var(--line); color:var(--text);
+  padding:12px 12px; border-radius:10px; font-size:16px; font-family:inherit;
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--amber); outline-offset:1px; border-color:var(--amber);}
+textarea{resize:vertical; min-height:60px;}
+.field{margin-bottom:12px;}
+.btn{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  border:none; border-radius:12px; padding:15px 18px; font-size:16px; font-weight:700;
+  font-family:'Barlow Condensed'; text-transform:uppercase; letter-spacing:0.03em;
+  cursor:pointer; width:100%;
+}
+.btn-primary{background:var(--amber); color:#1c1408;}
+.btn-primary:active{background:var(--amber-hi);}
+.btn-pine{background:var(--pine); color:#eafff0;}
+.btn-pine:active{background:var(--pine-hi);}
+.btn-ghost{background:var(--bg-elev); color:var(--text); border:1px solid var(--line);}
+.btn-danger{background:transparent; color:var(--danger); border:1px solid var(--danger);}
+.btn-sm{padding:10px 14px; font-size:14px; width:auto;}
+.pill{display:inline-flex; align-items:center; gap:5px; background:var(--bg-elev); border:1px solid var(--line); border-radius:999px; padding:4px 10px; font-size:12px; font-weight:600; color:var(--text-dim);}
+.pill.role-h{color:var(--pine-hi); border-color:var(--pine);}
+.pill.role-f{color:var(--amber-hi); border-color:var(--amber);}
+.pill.status-done{color:var(--pine-hi); border-color:var(--pine);}
+.pill.status-active{color:var(--amber-hi); border-color:var(--amber);}
+.divider{height:1px; background:var(--line); margin:14px 0;}
+.tabbar{
+  position:fixed; bottom:0; left:0; right:0; z-index:10;
+  max-width:520px; margin:0 auto;
+  background:rgba(23,21,18,0.92); backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);
+  display:flex; padding-bottom:var(--safe-b);
+}
+.tab{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 4px 8px; background:none; border:none; color:var(--text-faint); font-family:'Barlow Condensed'; font-size:11px; text-transform:uppercase; letter-spacing:0.03em; font-weight:700;}
+.tab.active{color:var(--amber-hi);}
+.tab svg{width:22px; height:22px;}
+.fab-start{
+  position:relative; margin:6px 0 18px; width:100%; padding:20px; border-radius:16px;
+  background:linear-gradient(135deg, var(--amber), #c96b12); color:#1c1408; border:none;
+  font-family:'Barlow Condensed'; font-weight:800; font-size:20px; text-transform:uppercase; letter-spacing:0.03em;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  box-shadow:0 8px 20px -6px rgba(232,135,30,0.5);
+}
+.gauge-wrap{display:flex; flex-direction:column; align-items:center; padding:6px 0 2px;}
+.gauge-num{font-family:'Barlow Condensed'; font-weight:800; font-size:15px; fill:var(--amber-hi);}
+.small{font-size:12px; color:var(--text-dim);}
+.tiny{font-size:11px; color:var(--text-faint);}
+.entry-row{display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line);}
+.entry-row:last-child{border-bottom:none;}
+.numpad-display{font-family:'Barlow Condensed'; font-weight:800; font-size:44px; text-align:center; color:var(--amber-hi); padding:14px 0; letter-spacing:0.02em;}
+.numpad{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+.numkey{background:var(--bg-elev); border:1px solid var(--line); color:var(--text); border-radius:10px; padding:16px 0; font-size:20px; font-family:'Barlow Condensed'; font-weight:700;}
+.numkey:active{background:var(--bg-card-hi);}
+.chip-row{display:flex; flex-wrap:wrap; gap:8px;}
+.chip{background:var(--bg-elev); border:1px solid var(--line); color:var(--text-dim); border-radius:999px; padding:8px 14px; font-size:13px; font-weight:600;}
+.chip.active{background:var(--pine); color:#eafff0; border-color:var(--pine-hi);}
+.chip.addchip{border-style:dashed; color:var(--amber-hi); border-color:var(--amber);}
+.lb-row{display:flex; align-items:center; gap:10px; padding:11px 0; border-bottom:1px solid var(--line);}
+.lb-row:last-child{border-bottom:none;}
+.lb-rank{font-family:'Barlow Condensed'; font-weight:800; font-size:16px; width:26px; color:var(--text-dim); text-align:center;}
+.lb-rank.gold{color:var(--gold);} .lb-rank.silver{color:var(--silver);} .lb-rank.bronze{color:var(--bronze);}
+.lb-name{font-weight:700; font-size:14px;}
+.lb-sub{font-size:11px; color:var(--text-faint);}
+.lb-vol{margin-left:auto; font-family:'Barlow Condensed'; font-weight:800; color:var(--amber-hi); font-size:15px;}
+.ach-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.ach{background:var(--bg-elev); border:1px solid var(--line); border-radius:12px; padding:12px; text-align:center;}
+.ach.locked{opacity:0.35;}
+.ach .ico{font-size:26px;}
+.ach .t{font-size:12px; font-weight:700; margin-top:4px;}
+.modal-bg{position:fixed; inset:0; background:rgba(10,9,7,0.7); z-index:20; display:flex; align-items:flex-end;}
+.modal{background:var(--bg-card); width:100%; max-width:520px; margin:0 auto; border-radius:20px 20px 0 0; padding:20px 16px calc(24px + var(--safe-b)); max-height:88vh; overflow-y:auto; border-top:1px solid var(--line);}
+.modal-handle{width:36px; height:4px; background:var(--line); border-radius:2px; margin:0 auto 14px;}
+.empty{text-align:center; padding:30px 10px; color:var(--text-faint);}
+.empty .ico{font-size:36px; margin-bottom:8px;}
+.badge-live{display:inline-flex; align-items:center; gap:5px; font-size:11px; color:var(--pine-hi); font-weight:700;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--pine-hi);}
+::selection{background:var(--amber); color:#1c1408;}
+.wgrain{position:absolute; inset:0; opacity:0.04; pointer-events:none; background-image:repeating-linear-gradient(115deg, #fff 0px, transparent 2px, transparent 6px);}
+.status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.status-done{background:var(--pine-hi);} .status-active{background:var(--amber-hi);}
+.toast{position:fixed; bottom:calc(100px + var(--safe-b)); left:50%; transform:translateX(-50%); background:var(--bg-card-hi); border:1px solid var(--amber); color:var(--text); padding:11px 18px; border-radius:999px; font-size:13px; font-weight:600; z-index:30; box-shadow:0 6px 20px rgba(0,0,0,0.4);}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="wgrain"></div>
+  <div id="screen"></div>
+  <div class="tabbar" id="tabbar"></div>
+</div>
+
+<script>
+/* ---------------- Storage helpers ---------------- */
+async function sGet(key, shared=false){
+  try{ const r = await window.storage.get(key, shared); return r ? JSON.parse(r.value) : null; }
+  catch(e){ return null; }
+}
+async function sSet(key, val, shared=false){
+  try{ await window.storage.set(key, JSON.stringify(val), shared); }catch(e){ console.error('storage set failed', e); }
+}
+async function sListKeys(prefix, shared=false){
+  try{ const r = await window.storage.list(prefix, shared); return r ? r.keys : []; }catch(e){ return []; }
+}
+
+/* ---------------- App state ---------------- */
+let PROFILE = null;
+let LANKS = [];
+let WORKDAYS = [];
+let ACTIVE_TAB = 'home';
+let ACTIVE_DAY_ID = null;
+let ACTIVE_LANK_ID = null;
+
+const SORTIMENTS_DEFAULT = ['Kuusepalk','Männipalk','Kasepalk','Paberipuit','Küttepuit','Muu'];
+const HARVESTERS = {'John Deere':['1070G','1170G','1270G','1470G'], 'Ponsse':['Scorpion','Ergo','Cobra'], 'Komatsu':['901','911','931']};
+const FORVARDERS = {'John Deere':['810G','910G','1110G','1510G'], 'Ponsse':['Buffalo','Elephant','Wisent'], 'Komatsu':['845','855','875']};
+
+function getSortiments(){ return (PROFILE && PROFILE.sortiments && PROFILE.sortiments.length) ? PROFILE.sortiments : SORTIMENTS_DEFAULT; }
+
+const ACHIEVEMENTS = [
+  {id:'v100', ico:'🌱', t:'Esimene 100 tm', check:s=>s.totalVolume>=100},
+  {id:'v1000', ico:'🪓', t:'1000 tm', check:s=>s.totalVolume>=1000},
+  {id:'v10000', ico:'🏆', t:'10 000 tm', check:s=>s.totalVolume>=10000},
+  {id:'lank100', ico:'🌲', t:'100 valmis lanki', check:s=>s.doneLanks>=100},
+  {id:'days50', ico:'📅', t:'50 tööpäeva', check:s=>s.totalDays>=50},
+  {id:'loads5000', ico:'🚛', t:'5000 koormat', check:s=>s.totalLoads>=5000},
+];
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function fmt(n, d=1){ return (Math.round(n*10**d)/10**d).toLocaleString('et-EE'); }
+function isSameWeek(dateStr){
+  const d = new Date(dateStr), now = new Date();
+  const week = (dd)=>Math.ceil((((dd - new Date(dd.getFullYear(),0,1))/86400000)+new Date(dd.getFullYear(),0,1).getDay()+1)/7);
+  return week(d)===week(now) && d.getFullYear()===now.getFullYear();
+}
+function isSameMonth(dateStr){ const d=new Date(dateStr), n=new Date(); return d.getMonth()===n.getMonth() && d.getFullYear()===n.getFullYear(); }
+function isSameYear(dateStr){ const d=new Date(dateStr), n=new Date(); return d.getFullYear()===n.getFullYear(); }
+
+function dayVolume(day){
+  if(!day) return 0;
+  if(day.role==='Harvesterijuht') return (day.entries||[]).reduce((a,e)=>a+e.volume,0);
+  return (day.loads||[]).reduce((a,l)=>a+l.volume,0);
+}
+function dayLoadsCount(day){ return day.role==='Forvarderijuht' ? (day.loads||[]).length : 0; }
+function lankVolume(lank){ return WORKDAYS.filter(d=>d.lankId===lank.id).reduce((a,d)=>a+dayVolume(d),0); }
+function lankSessions(lank){ return WORKDAYS.filter(d=>d.lankId===lank.id).sort((a,b)=>b.date.localeCompare(a.date)); }
+
+function computeStats(){
+  const totalVolume = WORKDAYS.reduce((a,d)=>a+dayVolume(d),0);
+  const doneLanks = LANKS.filter(l=>l.status==='done').length;
+  const totalDays = WORKDAYS.filter(d=>d.status==='done').length;
+  const totalLoads = WORKDAYS.reduce((a,d)=>a+dayLoadsCount(d),0);
+  const totalLoadVolume = WORKDAYS.reduce((a,d)=> a + (d.role==='Forvarderijuht' ? (d.loads||[]).reduce((x,l)=>x+l.volume,0) : 0), 0);
+  const today = WORKDAYS.filter(d=>d.date===todayStr()).reduce((a,d)=>a+dayVolume(d),0);
+  const week = WORKDAYS.filter(d=>isSameWeek(d.date)).reduce((a,d)=>a+dayVolume(d),0);
+  const month = WORKDAYS.filter(d=>isSameMonth(d.date)).reduce((a,d)=>a+dayVolume(d),0);
+  const year = WORKDAYS.filter(d=>isSameYear(d.date)).reduce((a,d)=>a+dayVolume(d),0);
+  const avgDay = totalDays>0 ? totalVolume/totalDays : 0;
+  const maxDay = WORKDAYS.reduce((m,d)=>Math.max(m,dayVolume(d)),0);
+  const avgLank = doneLanks>0 ? totalVolume/doneLanks : 0;
+  const avgLoad = totalLoads>0 ? totalLoadVolume/totalLoads : 0;
+  return {totalVolume, doneLanks, totalDays, totalLoads, today, week, month, year, avgDay, maxDay, avgLank, avgLoad};
+}
+
+function sortimentBreakdown(){
+  const map = {};
+  WORKDAYS.forEach(d=>{
+    (d.entries||[]).forEach(e=>{ map[e.sortiment]=(map[e.sortiment]||0)+e.volume; });
+    (d.loads||[]).forEach(l=>{ map[l.sortiment]=(map[l.sortiment]||0)+l.volume; });
+  });
+  return map;
+}
+
+async function saveProfile(){ await sSet('profile', PROFILE, false); }
+async function persistAll(){
+  await sSet('lanks', LANKS, false);
+  await sSet('workdays', WORKDAYS, false);
+  await syncLeaderboard();
+}
+
+async function syncLeaderboard(){
+  if(!PROFILE) return;
+  const s = computeStats();
+  const entry = {
+    name: PROFILE.firstName+' '+PROFILE.lastName,
+    username: PROFILE.username,
+    role: PROFILE.role,
+    machine: PROFILE.manufacturer+' '+PROFILE.model,
+    totalVolume: s.totalVolume,
+    today: s.today, week: s.week, month: s.month, year: s.year,
+    doneLanks: s.doneLanks, avgDay: s.avgDay, avgLoad: s.avgLoad,
+    updated: Date.now()
+  };
+  await sSet('leaderboard:'+PROFILE.username, entry, true);
+}
+
+function toast(msg){
+  const el = document.createElement('div');
+  el.className='toast'; el.textContent=msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 2200);
+}
+
+/* ---------------- Icons ---------------- */
+const ICONS = {
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
+  work:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21l6-6"/><path d="M14 3l7 7-3.5 3.5L10 6z"/><path d="M9 8l7 7"/></svg>',
+  stats:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg>',
+  board:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6 6 1-4.5 4 1 6L12 16l-5.5 3 1-6L3 9l6-1z"/></svg>',
+  profile:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+};
+
+/* ---------------- Router / render ---------------- */
+function setTab(t){ ACTIVE_TAB = t; ACTIVE_LANK_ID = null; render(); }
+
+function renderTabbar(){
+  const tabs = [['home','Kodu'],['work','Töö'],['stats','Statistika'],['board','Edetabel'],['profile','Profiil']];
+  document.getElementById('tabbar').innerHTML = tabs.map(([id,label])=>`
+    <button class="tab ${ACTIVE_TAB===id?'active':''}" onclick="setTab('${id}')">${ICONS[id]}<span>${label}</span></button>
+  `).join('');
+}
+
+async function render(){
+  renderTabbar();
+  const el = document.getElementById('screen');
+  if(!PROFILE){ el.innerHTML = onboardingHTML(); attachOnboarding(); return; }
+  if(ACTIVE_DAY_ID){ el.innerHTML = activeDayHTML(); attachActiveDay(); return; }
+  if(ACTIVE_LANK_ID){ el.innerHTML = lankDetailHTML(); attachLankDetail(); return; }
+  if(ACTIVE_TAB==='home') el.innerHTML = homeHTML();
+  else if(ACTIVE_TAB==='work') el.innerHTML = workTabHTML();
+  else if(ACTIVE_TAB==='stats') el.innerHTML = statsHTML();
+  else if(ACTIVE_TAB==='board') { el.innerHTML = `<div class="topbar"><div><div class="eyebrow">Kogukond</div><div class="pagetitle">Edetabel</div></div></div><div id="lbContainer" class="empty">Laen...</div>`; loadLeaderboard(); }
+  else if(ACTIVE_TAB==='profile') el.innerHTML = profileHTML();
+  attachGlobal();
+}
+
+/* ---------------- Onboarding ---------------- */
+function onboardingHTML(){
+  return `
+  <div class="topbar"><div><div class="eyebrow">Tere tulemast</div><div class="pagetitle">ForestTrack AI</div></div></div>
+  <div class="card">
+    <p class="small">Loo oma profiil, et alustada tööpäeviku pidamist.</p>
+    <div class="field"><label>Eesnimi</label><input id="ob_first" placeholder="Markus"></div>
+    <div class="field"><label>Perekonnanimi</label><input id="ob_last" placeholder="Mägi"></div>
+    <div class="field"><label>Kasutajanimi</label><input id="ob_user" placeholder="markusm"></div>
+    <div class="field"><label>E-post</label><input id="ob_email" type="email" placeholder="markus@metsa.ee"></div>
+    <div class="field"><label>Telefon (valikuline)</label><input id="ob_phone" placeholder="+372 5..."></div>
+    <div class="field"><label>Ettevõte</label><input id="ob_company" placeholder="Metsa OÜ"></div>
+    <div class="field">
+      <label>Amet (peamine)</label>
+      <div class="chip-row" id="ob_role">
+        <button type="button" class="chip active" data-role="Harvesterijuht">🌲 Harvesterijuht</button>
+        <button type="button" class="chip" data-role="Forvarderijuht">🚛 Forvarderijuht</button>
+      </div>
+      <div class="tiny" style="margin-top:6px;">Saad hiljem iga tööpäeva puhul rolli vahetada, kui juhid mõlemat masinat.</div>
+    </div>
+    <div class="divider"></div>
+    <div class="field"><label>Masina tootja</label>
+      <select id="ob_manu"></select>
+    </div>
+    <div class="field"><label>Mudel</label><select id="ob_model"></select></div>
+    <div class="field"><label>Aasta</label><input id="ob_year" type="number" placeholder="2022" min="1990" max="2026"></div>
+    <button class="btn btn-primary" id="ob_submit" style="margin-top:6px;">Loo profiil</button>
+  </div>`;
+}
+function attachOnboarding(){
+  let role = 'Harvesterijuht';
+  const roleWrap = document.getElementById('ob_role');
+  const manuSel = document.getElementById('ob_manu');
+  const modelSel = document.getElementById('ob_model');
+  function refreshMachines(){
+    const src = role==='Harvesterijuht' ? HARVESTERS : FORVARDERS;
+    manuSel.innerHTML = Object.keys(src).map(m=>`<option value="${m}">${m}</option>`).join('');
+    refreshModels();
+  }
+  function refreshModels(){
+    const src = role==='Harvesterijuht' ? HARVESTERS : FORVARDERS;
+    const models = src[manuSel.value] || [];
+    modelSel.innerHTML = models.map(m=>`<option value="${m}">${m}</option>`).join('');
+  }
+  manuSel.onchange = refreshModels;
+  roleWrap.querySelectorAll('.chip').forEach(c=>{
+    c.onclick = ()=>{ roleWrap.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); role=c.dataset.role; refreshMachines(); };
+  });
+  refreshMachines();
+
+  document.getElementById('ob_submit').onclick = async ()=>{
+    const firstName = document.getElementById('ob_first').value.trim();
+    const lastName = document.getElementById('ob_last').value.trim();
+    const username = document.getElementById('ob_user').value.trim() || (firstName+lastName).toLowerCase();
+    if(!firstName || !lastName){ toast('Palun sisesta nimi'); return; }
+    PROFILE = {
+      firstName, lastName, username,
+      email: document.getElementById('ob_email').value.trim(),
+      phone: document.getElementById('ob_phone').value.trim(),
+      company: document.getElementById('ob_company').value.trim(),
+      role,
+      manufacturer: manuSel.value, model: modelSel.value, year: document.getElementById('ob_year').value || '',
+      compartment: null,
+      sortiments: [...SORTIMENTS_DEFAULT],
+    };
+    await saveProfile();
+    await persistAll();
+    toast('Profiil loodud!');
+    render();
+  };
+}
+
+/* ---------------- Home ---------------- */
+function gaugeSVG(pct, label, value){
+  pct = Math.max(0, Math.min(1,pct));
+  const r=54, c=2*Math.PI*r, off = c*(1-pct);
+  return `<svg width="150" height="150" viewBox="0 0 150 150">
+    <circle cx="75" cy="75" r="${r}" fill="none" stroke="#332e24" stroke-width="12"/>
+    <circle cx="75" cy="75" r="${r}" fill="none" stroke="url(#g1)" stroke-width="12" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 75 75)"/>
+    <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e8871e"/><stop offset="100%" stop-color="#ffa23f"/></linearGradient></defs>
+    <text x="75" y="70" text-anchor="middle" class="gauge-num" style="font-size:26px;">${fmt(value)}</text>
+    <text x="75" y="90" text-anchor="middle" fill="#b6ad9a" style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em;">tm ${label}</text>
+  </svg>`;
+}
+
+function activeWorkday(){ return WORKDAYS.find(d=>d.status==='active'); }
+
+function homeHTML(){
+  const s = computeStats();
+  const goal = 30;
+  const active = activeWorkday();
+  const activeLank = active ? LANKS.find(l=>l.id===active.lankId) : null;
+  return `
+  <div class="topbar">
+    <div>
+      <div class="eyebrow">${PROFILE.role==='Harvesterijuht'?'🌲 Harvesterijuht':'🚛 Forvarderijuht'}</div>
+      <div class="pagetitle">Tere, ${PROFILE.firstName}</div>
+    </div>
+  </div>
+
+  ${active ? `
+  <div class="card hi" onclick="openDay('${active.id}')" style="cursor:pointer;">
+    <div class="row"><span class="badge-live"><span class="dot"></span>POOLELI TÖÖPÄEV</span><span class="small">${active.date}</span></div>
+    <h3 style="font-size:20px; margin-top:6px;">${activeLank ? activeLank.name : ''}</h3>
+    <div class="small">${fmt(dayVolume(active))} tm salvestatud &middot; puuduta jätkamiseks</div>
+  </div>` : `
+  <button class="fab-start" onclick="startNewDay()">${ICONS.work} Alusta uut tööpäeva</button>
+  `}
+
+  <div class="gauge-wrap">${gaugeSVG(s.today/goal, 'täna', s.today)}</div>
+
+  <div class="grid3" style="margin-top:14px;">
+    <div class="statbox"><div class="num">${fmt(s.week)}</div><div class="lbl">Nädal tm</div></div>
+    <div class="statbox"><div class="num">${fmt(s.month)}</div><div class="lbl">Kuu tm</div></div>
+    <div class="statbox"><div class="num">${fmt(s.year)}</div><div class="lbl">Aasta tm</div></div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="row"><h3 style="font-size:16px;">Minu kokkuvõte</h3><span class="small">${PROFILE.company||'—'}</span></div>
+    <div class="divider"></div>
+    <div class="grid3">
+      <div class="statbox"><div class="num">${fmt(s.totalVolume,0)}</div><div class="lbl">Kokku tm</div></div>
+      <div class="statbox"><div class="num">${s.doneLanks}</div><div class="lbl">Valmis lanki</div></div>
+      <div class="statbox"><div class="num">${s.totalDays}</div><div class="lbl">Tööpäeva</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row"><h3 style="font-size:16px;">Viimased langid</h3><span class="small" style="cursor:pointer; color:var(--amber-hi);" onclick="setTab('work')">Kõik &rarr;</span></div>
+    <div class="divider"></div>
+    ${recentLanksHTML()}
+  </div>
+  `;
+}
+function recentLanksHTML(){
+  const list = [...LANKS].sort((a,b)=>b.createdDate.localeCompare(a.createdDate)).slice(0,4);
+  if(list.length===0) return `<div class="empty"><div class="ico">🌲</div>Ühtegi lanki pole veel alustatud</div>`;
+  return list.map(l=>`
+    <div class="entry-row" style="cursor:pointer;" onclick="openLankSmart('${l.id}')">
+      <div class="row" style="width:100%;">
+        <div><span class="status-dot ${l.status==='done'?'status-done':'status-active'}" style="display:inline-block; margin-right:8px;"></span><b style="font-size:14px;">${l.name}</b><div class="tiny" style="margin-left:17px;">${l.createdDate}</div></div>
+        <div class="small" style="color:var(--amber-hi); font-weight:700;">${fmt(lankVolume(l))} tm</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ---------------- Work tab (lank list + start) ---------------- */
+function workTabHTML(){
+  const list = [...LANKS].sort((a,b)=>b.createdDate.localeCompare(a.createdDate));
+  const active = activeWorkday();
+  const activeLank = active ? LANKS.find(l=>l.id===active.lankId) : null;
+  return `
+  <div class="topbar"><div><div class="eyebrow">Töö</div><div class="pagetitle">Langid</div></div></div>
+  ${!active ? `<button class="fab-start" onclick="startNewDay()">${ICONS.work} Alusta uut tööpäeva</button>` : `
+    <div class="card hi" onclick="openDay('${active.id}')" style="cursor:pointer;">
+      <div class="row"><span class="badge-live"><span class="dot"></span>AKTIIVNE</span><span class="small">${active.date}</span></div>
+      <h3 style="font-size:20px; margin-top:6px;">${activeLank ? activeLank.name : ''}</h3>
+      <div class="small">${fmt(dayVolume(active))} tm &middot; puuduta jätkamiseks</div>
+    </div>`}
+  <div class="card">
+    <h3 style="font-size:16px; margin-bottom:6px;">Kõik langid (${list.length})</h3>
+    <div class="divider"></div>
+    ${list.length? list.map(l=>`
+      <div class="entry-row" style="cursor:pointer;" onclick="openLankSmart('${l.id}')">
+        <div class="row" style="width:100%;">
+          <div><span class="status-dot ${l.status==='done'?'status-done':'status-active'}" style="display:inline-block; margin-right:8px;"></span><b style="font-size:14px;">${l.name}</b><div class="tiny" style="margin-left:17px;">${l.createdDate} ${l.forestDistrict?'&middot; '+l.forestDistrict:''}</div></div>
+          <div class="small" style="color:var(--amber-hi); font-weight:700;">${fmt(lankVolume(l))} tm</div>
+        </div>
+      </div>`).join('') : `<div class="empty"><div class="ico">🌲</div>Ühtegi lanki pole veel</div>`}
+  </div>`;
+}
+
+/* ---------------- Start new day modal ---------------- */
+function startNewDay(){
+  const activeLanksList = LANKS.filter(l=>l.status==='active');
+  const el = document.createElement('div');
+  el.className='modal-bg'; el.id='startModal';
+  el.innerHTML = `
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 style="font-size:20px; margin-bottom:14px;">Uus tööpäev</h2>
+
+    ${activeLanksList.length>0 ? `
+    <div class="field">
+      <label>Lank</label>
+      <div class="chip-row" id="nd_mode">
+        <button type="button" class="chip active" data-m="new">+ Uus lank</button>
+        <button type="button" class="chip" data-m="existing">Olemasolev lank</button>
+      </div>
+    </div>` : ''}
+
+    <div id="nd_existing_wrap" style="display:none;">
+      <div class="field"><label>Vali lank</label>
+        <div class="chip-row" id="nd_existing_list">
+          ${activeLanksList.map((l,i)=>`<button type="button" class="chip ${i===0?'active':''}" data-id="${l.id}">${l.name}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div id="nd_new_wrap">
+      <div class="field"><label>Langi nimi</label><input id="nd_lank" placeholder="Lank 24 või Kv 35 Er 12"></div>
+      <div class="field"><label>Ettevõte</label><input id="nd_company" value="${PROFILE.company||''}"></div>
+      <div class="field"><label>Metskond</label><input id="nd_district" placeholder="nt Rakvere metskond"></div>
+      <div class="field"><label>Asukoht (GPS)</label>
+        <button type="button" class="btn btn-ghost btn-sm" id="nd_gps">📍 Hangi asukoht</button>
+        <div class="tiny" id="nd_gps_result" style="margin-top:6px;"></div>
+      </div>
+      <div class="field"><label>Märkused</label><textarea id="nd_notes" placeholder="valikuline"></textarea></div>
+    </div>
+
+    <div class="field"><label>Roll täna</label>
+      <div class="chip-row" id="nd_role">
+        <button type="button" class="chip ${PROFILE.role==='Harvesterijuht'?'active':''}" data-r="Harvesterijuht">🌲 Harvesterijuht</button>
+        <button type="button" class="chip ${PROFILE.role==='Forvarderijuht'?'active':''}" data-r="Forvarderijuht">🚛 Forvarderijuht</button>
+      </div>
+      <div class="tiny" style="margin-top:6px;">Kui täna juhid teist masinat kui tavaliselt, vali see siin.</div>
+    </div>
+
+    <div class="field"><label>Ilm</label>
+      <div class="chip-row" id="nd_weather">
+        ${['☀️ Selge','☁️ Pilves','🌧️ Vihm','❄️ Lumi'].map((w,i)=>`<button type="button" class="chip ${i===0?'active':''}" data-w="${w}">${w}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="row" style="gap:10px; margin-top:6px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('startModal').remove()">Loobu</button>
+      <button class="btn btn-primary" id="nd_submit">Alusta</button>
+    </div>
+  </div>`;
+  document.body.appendChild(el);
+
+  let mode = 'new';
+  let role = PROFILE.role;
+  let weather = '☀️ Selge';
+  let loc = null;
+  let selectedExistingId = activeLanksList[0] ? activeLanksList[0].id : null;
+
+  const modeWrap = document.getElementById('nd_mode');
+  if(modeWrap){
+    modeWrap.querySelectorAll('.chip').forEach(c=>{
+      c.onclick = ()=>{
+        modeWrap.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); c.classList.add('active');
+        mode = c.dataset.m;
+        document.getElementById('nd_existing_wrap').style.display = mode==='existing' ? 'block' : 'none';
+        document.getElementById('nd_new_wrap').style.display = mode==='existing' ? 'none' : 'block';
+      };
+    });
+  }
+  document.getElementById('nd_existing_list')?.querySelectorAll('.chip').forEach(c=>{
+    c.onclick = ()=>{ document.querySelectorAll('#nd_existing_list .chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); selectedExistingId = c.dataset.id; };
+  });
+  document.getElementById('nd_role').querySelectorAll('.chip').forEach(c=>{
+    c.onclick = ()=>{ document.querySelectorAll('#nd_role .chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); role=c.dataset.r; };
+  });
+  document.getElementById('nd_weather').querySelectorAll('.chip').forEach(c=>{
+    c.onclick=()=>{ document.querySelectorAll('#nd_weather .chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); weather=c.dataset.w; };
+  });
+  document.getElementById('nd_gps').onclick = ()=>{
+    if(!navigator.geolocation){ document.getElementById('nd_gps_result').textContent='GPS pole saadaval'; return; }
+    document.getElementById('nd_gps_result').textContent='Otsin asukohta...';
+    navigator.geolocation.getCurrentPosition(pos=>{
+      loc = {lat:pos.coords.latitude, lng:pos.coords.longitude};
+      document.getElementById('nd_gps_result').textContent = `📍 ${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}`;
+    }, err=>{ document.getElementById('nd_gps_result').textContent='Asukoha hankimine ebaõnnestus'; });
+  };
+
+  document.getElementById('nd_submit').onclick = async ()=>{
+    let lank;
+    if(mode==='existing'){
+      lank = LANKS.find(l=>l.id===selectedExistingId);
+      if(!lank){ toast('Vali lank'); return; }
+    } else {
+      const name = document.getElementById('nd_lank').value.trim();
+      if(!name){ toast('Sisesta langi nimi'); return; }
+      lank = {
+        id: uid(), name,
+        company: document.getElementById('nd_company').value.trim(),
+        forestDistrict: document.getElementById('nd_district').value.trim(),
+        location: loc, notes: document.getElementById('nd_notes').value.trim(),
+        status:'active', createdDate: todayStr(), doneDate: null
+      };
+      LANKS.push(lank);
+    }
+    const day = {
+      id: uid(), lankId: lank.id, role,
+      date: todayStr(), startTime: new Date().toISOString(), endTime:null,
+      weather, status:'active', entries:[], loads:[]
+    };
+    WORKDAYS.push(day);
+    await persistAll();
+    el.remove();
+    ACTIVE_DAY_ID = day.id;
+    ACTIVE_LANK_ID = null;
+    render();
+  };
+}
+
+function openDay(id){ ACTIVE_DAY_ID = id; ACTIVE_LANK_ID = null; render(); }
+function closeDay(){ ACTIVE_DAY_ID = null; render(); }
+function openLank(id){ ACTIVE_LANK_ID = id; ACTIVE_DAY_ID = null; render(); }
+function closeLank(){ ACTIVE_LANK_ID = null; render(); }
+function openLankSmart(lankId){
+  const d = WORKDAYS.find(w=>w.lankId===lankId && w.status==='active');
+  if(d){ openDay(d.id); } else { openLank(lankId); }
+}
+
+/* ---------------- Lank detail (history) screen ---------------- */
+function lankDetailHTML(){
+  const lank = LANKS.find(l=>l.id===ACTIVE_LANK_ID);
+  if(!lank){ ACTIVE_LANK_ID=null; return workTabHTML(); }
+  const sessions = lankSessions(lank);
+  const vol = lankVolume(lank);
+  const globalActive = activeWorkday();
+  const canStartHere = lank.status==='active' && !globalActive;
+  return `
+  <div class="topbar">
+    <button class="btn-ghost btn btn-sm" style="width:auto;" onclick="closeLank()">&larr; Tagasi</button>
+    <span class="pill ${lank.status==='done'?'status-done':'status-active'}">${lank.status==='done'?'VALMIS':'POOLELI'}</span>
+  </div>
+  <div style="padding:0 2px;">
+    <div class="eyebrow">${lank.createdDate} ${lank.forestDistrict? '&middot; '+lank.forestDistrict:''}</div>
+    <h1 class="pagetitle" style="font-size:26px;">${lank.name}</h1>
+    <div class="chip-row" style="margin-top:8px;">
+      ${lank.company? `<span class="pill">${lank.company}</span>`:''}
+      ${lank.location? `<span class="pill">📍 ${lank.location.lat.toFixed(3)}, ${lank.location.lng.toFixed(3)}</span>`:''}
+    </div>
+  </div>
+
+  <div class="card hi" style="margin-top:14px; text-align:center;">
+    <div class="tiny">KOGUMAHT SELLEL LANGIL</div>
+    <div style="font-family:'Barlow Condensed'; font-weight:800; font-size:44px; color:var(--amber-hi);">${fmt(vol)} <span style="font-size:18px; color:var(--text-dim);">tm</span></div>
+    <div class="tiny">${sessions.length} tööpäeva</div>
+  </div>
+
+  ${lank.notes? `<div class="card"><div class="tiny">MÄRKUSED</div><div class="small" style="margin-top:4px;">${lank.notes}</div></div>`:''}
+
+  <div class="card">
+    <h3 style="font-size:16px; margin-bottom:6px;">Tööpäevad sellel langil</h3>
+    <div class="divider"></div>
+    ${sessions.length? sessions.map(d=>`
+      <div class="entry-row" style="cursor:pointer;" onclick="openDay('${d.id}')">
+        <div><span class="status-dot ${d.status==='done'?'status-done':'status-active'}" style="display:inline-block; margin-right:8px;"></span><b style="font-size:14px;">${d.date}</b><div class="tiny" style="margin-left:17px;">${d.role==='Harvesterijuht'?'🌲':'🚛'} ${d.weather||''}</div></div>
+        <div style="color:var(--amber-hi); font-weight:700;">${fmt(dayVolume(d))} tm</div>
+      </div>`).join('') : `<div class="empty">Ühtegi tööpäeva pole veel</div>`}
+  </div>
+
+  ${lank.status==='active' ? `
+    ${canStartHere ? `<button class="btn btn-primary" id="continueLankBtn">${ICONS.work} Alusta tööpäev sellel langil</button>` :
+      (globalActive && globalActive.lankId===lank.id ? `<button class="btn btn-primary" onclick="openDay('${globalActive.id}')">Jätka praegust tööpäeva</button>` :
+      `<div class="tiny" style="text-align:center; margin-bottom:10px;">Lõpeta praegune aktiivne tööpäev enne uue alustamist</div>`)}
+    <button class="btn btn-pine" id="finishLankBtn">✓ Märgi lank valmis</button>
+  ` : `<div class="empty" style="padding:10px;"><div class="ico">✅</div>Lank on valmis ${lank.doneDate? '('+lank.doneDate+')':''}</div>`}
+  `;
+}
+function attachLankDetail(){
+  document.getElementById('continueLankBtn')?.addEventListener('click', ()=>{
+    const lank = LANKS.find(l=>l.id===ACTIVE_LANK_ID);
+    continueLank(lank);
+  });
+  document.getElementById('finishLankBtn')?.addEventListener('click', finishLank);
+}
+function continueLank(lank){
+  const el = document.createElement('div');
+  el.className='modal-bg'; el.id='contModal';
+  el.innerHTML = `
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 style="font-size:20px;">Alusta tööpäev</h2>
+    <div class="small" style="margin-bottom:10px;">${lank.name}</div>
+    <div class="field"><label>Roll täna</label>
+      <div class="chip-row" id="cn_role">
+        <button type="button" class="chip ${PROFILE.role==='Harvesterijuht'?'active':''}" data-r="Harvesterijuht">🌲 Harvesterijuht</button>
+        <button type="button" class="chip ${PROFILE.role==='Forvarderijuht'?'active':''}" data-r="Forvarderijuht">🚛 Forvarderijuht</button>
+      </div>
+    </div>
+    <div class="field"><label>Ilm</label>
+      <div class="chip-row" id="cn_weather">
+        ${['☀️ Selge','☁️ Pilves','🌧️ Vihm','❄️ Lumi'].map((w,i)=>`<button type="button" class="chip ${i===0?'active':''}" data-w="${w}">${w}</button>`).join('')}
+      </div>
+    </div>
+    <div class="row" style="gap:10px; margin-top:6px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('contModal').remove()">Loobu</button>
+      <button class="btn btn-primary" id="cn_submit">Alusta</button>
+    </div>
+  </div>`;
+  document.body.appendChild(el);
+  let role = PROFILE.role, weather='☀️ Selge';
+  document.getElementById('cn_role').querySelectorAll('.chip').forEach(c=>{
+    c.onclick=()=>{ document.querySelectorAll('#cn_role .chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); role=c.dataset.r; };
+  });
+  document.getElementById('cn_weather').querySelectorAll('.chip').forEach(c=>{
+    c.onclick=()=>{ document.querySelectorAll('#cn_weather .chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); weather=c.dataset.w; };
+  });
+  document.getElementById('cn_submit').onclick = async ()=>{
+    const day = { id:uid(), lankId:lank.id, role, date:todayStr(), startTime:new Date().toISOString(), endTime:null, weather, status:'active', entries:[], loads:[] };
+    WORKDAYS.push(day);
+    await persistAll();
+    el.remove();
+    ACTIVE_DAY_ID = day.id; ACTIVE_LANK_ID = null;
+    render();
+  };
+}
+
+/* ---------------- Active day screen (session recording) ---------------- */
+function activeDayHTML(){
+  const day = WORKDAYS.find(d=>d.id===ACTIVE_DAY_ID);
+  if(!day){ ACTIVE_DAY_ID=null; return homeHTML(); }
+  const lank = LANKS.find(l=>l.id===day.lankId) || {name:'—'};
+  const vol = dayVolume(day);
+  const isHarv = day.role==='Harvesterijuht';
+  return `
+  <div class="topbar">
+    <button class="btn-ghost btn btn-sm" style="width:auto;" onclick="closeDay()">&larr; Tagasi</button>
+    <span class="pill ${day.status==='done'?'status-done':'status-active'}">${day.status==='done'?'PÄEV VALMIS':'AKTIIVNE'}</span>
+  </div>
+  <div style="padding:0 2px;">
+    <div class="eyebrow">${day.date} &middot; ${isHarv?'🌲 Harvesterijuht':'🚛 Forvarderijuht'} ${lank.forestDistrict? '&middot; '+lank.forestDistrict:''}</div>
+    <h1 class="pagetitle" style="font-size:26px; cursor:pointer;" onclick="openLank('${lank.id}')">${lank.name} &rsaquo;</h1>
+    <div class="chip-row" style="margin-top:8px;">
+      <span class="pill">${day.weather||''}</span>
+      ${lank.company? `<span class="pill">${lank.company}</span>`:''}
+    </div>
+  </div>
+
+  <div class="card hi" style="margin-top:14px; text-align:center;">
+    <div class="tiny">TÄNANE MAHT SELLEL SESSIOONIL</div>
+    <div style="font-family:'Barlow Condensed'; font-weight:800; font-size:44px; color:var(--amber-hi);">${fmt(vol)} <span style="font-size:18px; color:var(--text-dim);">tm</span></div>
+  </div>
+
+  ${day.status==='active' ? (isHarv ? harvesterPanel(day) : forvarderPanel(day)) : ''}
+
+  <div class="card">
+    <h3 style="font-size:16px; margin-bottom:6px;">${isHarv? 'Lõigatud mahud':'Koormad'} (${isHarv? (day.entries||[]).length : (day.loads||[]).length})</h3>
+    <div class="divider"></div>
+    ${entriesListHTML(day, isHarv)}
+  </div>
+
+  ${day.status==='active' ? `
+  <button class="btn btn-pine" id="finishDayBtn" style="margin-bottom:10px;">✓ Lõpeta tööpäev</button>
+  <button class="btn btn-primary" id="finishLankFromDayBtn">🏁 Märgi lank valmis</button>
+  ` : `<div class="empty" style="padding:10px;"><div class="ico">✅</div>Tööpäev on lõpetatud</div>`}
+  `;
+}
+function entriesListHTML(day, isHarv){
+  const items = isHarv ? (day.entries||[]) : (day.loads||[]);
+  if(items.length===0) return `<div class="empty">Ühtegi kirjet pole veel lisatud</div>`;
+  return [...items].reverse().map(e=>`
+    <div class="entry-row">
+      <div><b style="font-size:14px;">${e.sortiment}</b><div class="tiny">${new Date(e.time).toLocaleTimeString('et-EE',{hour:'2-digit',minute:'2-digit'})}${e.destination? ' &middot; '+e.destination:''}</div></div>
+      <div style="color:var(--amber-hi); font-weight:700;">${fmt(e.volume)} tm</div>
+    </div>`).join('');
+}
+
+function sortimentChipsHTML(containerId, currentDefault){
+  return `<div class="chip-row" id="${containerId}">
+    ${getSortiments().map((s,i)=>`<button type="button" class="chip ${s===currentDefault?'active':''}" data-s="${s}">${s}</button>`).join('')}
+    <button type="button" class="chip addchip" id="${containerId}_add">+ Uus</button>
+  </div>`;
+}
+
+function harvesterPanel(day){
+  return `
+  <div class="card">
+    <h3 style="font-size:16px;">Lisa lõigatud maht</h3>
+    <div class="field" style="margin-top:10px;"><label>Sortiment</label>
+      ${sortimentChipsHTML('h_sort', getSortiments()[0])}
+    </div>
+    <div class="numpad-display" id="h_display">0.0</div>
+    <div class="numpad" id="h_numpad">
+      ${['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(k=>`<button type="button" class="numkey" data-k="${k}">${k}</button>`).join('')}
+    </div>
+    <button class="btn btn-primary" id="h_add" style="margin-top:10px;">+ Lisa maht (tm)</button>
+  </div>`;
+}
+function forvarderPanel(day){
+  const hasCompartment = PROFILE.compartment && PROFILE.compartment.bottom;
+  if(!hasCompartment){
+    return `<div class="card">
+      <h3 style="font-size:16px;">⚠️ Koormaruum seadistamata</h3>
+      <p class="small">Enne koormate lisamist tuleb seadistada masina koormaruumi mõõdud.</p>
+      <button class="btn btn-primary" id="setupCompartmentBtn">Seadista koormaruum</button>
+    </div>`;
+  }
+  return `
+  <div class="card">
+    <h3 style="font-size:16px;">Lisa koorem</h3>
+    <div class="tiny" style="margin-top:4px;">Koormaruumi maht: ${fmt(compartmentVolume())} m³</div>
+    <div class="field" style="margin-top:10px;"><label>Sortiment</label>
+      ${sortimentChipsHTML('f_sort', getSortiments()[0])}
+    </div>
+    <div class="numpad-display" id="f_display">0.0</div>
+    <div class="numpad" id="f_numpad">
+      ${['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(k=>`<button type="button" class="numkey" data-k="${k}">${k}</button>`).join('')}
+    </div>
+    <div class="field" style="margin-top:10px;"><label>Sihtkoht (nt Virn 3)</label><input id="f_dest" placeholder="Virn 3"></div>
+    <div class="field"><label>Kommentaar</label><input id="f_comment" placeholder="valikuline, nt märg puit"></div>
+    <button class="btn btn-primary" id="f_add">+ Lisa koorem</button>
+    <div class="divider"></div>
+    <button class="btn btn-ghost btn-sm" id="f_ai" style="width:100%;">📷 Kiirhinnang pildilt</button>
+  </div>`;
+}
+function compartmentVolume(){
+  const c = PROFILE.compartment; if(!c) return 0;
+  const bv = c.bottom.l*c.bottom.w*c.bottom.h;
+  const tv = c.top.l*c.top.w*c.top.h;
+  return bv+tv;
+}
+
+function attachActiveDay(){
+  const day = WORKDAYS.find(d=>d.id===ACTIVE_DAY_ID);
+  if(!day) return;
+  document.getElementById('finishDayBtn')?.addEventListener('click', finishDay);
+  document.getElementById('finishLankFromDayBtn')?.addEventListener('click', finishLank);
+  document.getElementById('setupCompartmentBtn')?.addEventListener('click', openCompartmentSetup);
+
+  if(day.status!=='active') return;
+
+  if(day.role==='Harvesterijuht'){
+    setupNumpad('h', day, false);
+    attachAddSortiment('h_sort_add');
+  } else if(PROFILE.compartment){
+    setupNumpad('f', day, true);
+    attachAddSortiment('f_sort_add');
+    document.getElementById('f_ai')?.addEventListener('click', openAiQuickEstimate);
+  }
+}
+function attachAddSortiment(btnId){
+  document.getElementById(btnId)?.addEventListener('click', async ()=>{
+    const name = prompt('Uue sortimendi nimi:');
+    if(name && name.trim()){
+      if(!PROFILE.sortiments) PROFILE.sortiments = [...SORTIMENTS_DEFAULT];
+      if(!PROFILE.sortiments.includes(name.trim())) PROFILE.sortiments.push(name.trim());
+      await saveProfile();
+      toast('Sortiment lisatud');
+      render();
+    }
+  });
+}
+function setupNumpad(prefix, day, isForvarder){
+  let val = '0';
+  let sort = getSortiments()[0];
+  const display = document.getElementById(prefix+'_display');
+  document.getElementById(prefix+'_sort').querySelectorAll('.chip:not(.addchip)').forEach(c=>{
+    c.onclick = ()=>{ document.querySelectorAll('#'+prefix+'_sort .chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); sort=c.dataset.s; };
+  });
+  document.getElementById(prefix+'_numpad').querySelectorAll('.numkey').forEach(k=>{
+    k.onclick = ()=>{
+      const key = k.dataset.k;
+      if(key==='⌫'){ val = val.length>1? val.slice(0,-1) : '0'; }
+      else if(key==='.'){ if(!val.includes('.')) val += '.'; }
+      else { val = (val==='0') ? key : val+key; }
+      display.textContent = val;
+    };
+  });
+  document.getElementById(prefix+'_add').onclick = async ()=>{
+    const v = parseFloat(val);
+    if(!v || v<=0){ toast('Sisesta kogus'); return; }
+    if(!isForvarder){
+      day.entries.push({id:uid(), volume:v, sortiment:sort, time:new Date().toISOString()});
+    } else {
+      const dest = document.getElementById('f_dest').value.trim();
+      const comment = document.getElementById('f_comment').value.trim();
+      day.loads.push({id:uid(), volume:v, sortiment:sort, destination:dest, comment, time:new Date().toISOString()});
+    }
+    await persistAll();
+    val='0'; display.textContent='0.0';
+    toast('Lisatud: '+fmt(v)+' tm');
+    render();
+  };
+}
+
+function openCompartmentSetup(){
+  const c = PROFILE.compartment;
+  const el = document.createElement('div');
+  el.className='modal-bg'; el.id='compModal';
+  el.innerHTML = `
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 style="font-size:20px;">Koormaruumi seadistus</h2>
+    <p class="small">Enamikul forvarderitel koosneb koorem kahest osast — alumine ja ülemine. Sisesta mõõdud meetrites.</p>
+    <h3 style="font-size:14px; margin:14px 0 8px; color:var(--amber-hi);">Alumine osa (m)</h3>
+    <div class="grid3">
+      <div class="field"><label>Pikkus</label><input id="c_bl" type="number" step="0.01" placeholder="4.5" value="${c?c.bottom.l:''}"></div>
+      <div class="field"><label>Laius</label><input id="c_bw" type="number" step="0.01" placeholder="2.6" value="${c?c.bottom.w:''}"></div>
+      <div class="field"><label>Kõrgus</label><input id="c_bh" type="number" step="0.01" placeholder="0.9" value="${c?c.bottom.h:''}"></div>
+    </div>
+    <h3 style="font-size:14px; margin:14px 0 8px; color:var(--amber-hi);">Ülemine osa (m)</h3>
+    <div class="grid3">
+      <div class="field"><label>Pikkus</label><input id="c_tl" type="number" step="0.01" placeholder="4.5" value="${c?c.top.l:''}"></div>
+      <div class="field"><label>Laius</label><input id="c_tw" type="number" step="0.01" placeholder="2.6" value="${c?c.top.w:''}"></div>
+      <div class="field"><label>Kõrgus</label><input id="c_th" type="number" step="0.01" placeholder="1.1" value="${c?c.top.h:''}"></div>
+    </div>
+    <div class="row" style="gap:10px; margin-top:10px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('compModal').remove()">Loobu</button>
+      <button class="btn btn-primary" id="c_save">Salvesta</button>
+    </div>
+  </div>`;
+  document.body.appendChild(el);
+  document.getElementById('c_save').onclick = async ()=>{
+    const g = id=>parseFloat(document.getElementById(id).value)||0;
+    PROFILE.compartment = {
+      bottom:{l:g('c_bl'), w:g('c_bw'), h:g('c_bh')},
+      top:{l:g('c_tl'), w:g('c_tw'), h:g('c_th')}
+    };
+    await saveProfile();
+    el.remove();
+    render();
+  };
+}
+
+function openAiQuickEstimate(){
+  const el = document.createElement('div');
+  el.className='modal-bg'; el.id='aiModal';
+  el.innerHTML = `
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 style="font-size:20px;">📷 Koorma kiirhinnang</h2>
+    <p class="small">Lihtsustatud hinnanguline arvutus koormaruumi mahu ja täituvuse põhjal (mitte päris kaameraga AI analüüs).</p>
+    <div class="field" style="margin-top:10px;"><label>Foto (valikuline, salvestatakse ainult kirjeldusena)</label>
+      <input type="file" id="ai_photo" accept="image/*" capture="environment">
+    </div>
+    <div class="field"><label>Täituvuse hinnang: <span id="ai_pct_val">70%</span></label>
+      <input type="range" id="ai_pct" min="10" max="100" value="70">
+    </div>
+    <div class="card" style="text-align:center;">
+      <div class="tiny">HINNANGULINE KOORMA MAHT</div>
+      <div id="ai_result" style="font-family:'Barlow Condensed'; font-weight:800; font-size:32px; color:var(--amber-hi);">0 tm</div>
+      <div class="tiny">Täpsus ±15% (lihtsustatud mudel)</div>
+    </div>
+    <div class="row" style="gap:10px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('aiModal').remove()">Sulge</button>
+      <button class="btn btn-primary" id="ai_confirm">Kinnita ja lisa</button>
+    </div>
+  </div>`;
+  document.body.appendChild(el);
+  const capV = compartmentVolume()*0.65;
+  const slider = document.getElementById('ai_pct');
+  const update = ()=>{
+    const pct = parseInt(slider.value);
+    document.getElementById('ai_pct_val').textContent = pct+'%';
+    document.getElementById('ai_result').textContent = fmt(capV*(pct/100)) + ' tm';
+  };
+  slider.oninput = update; update();
+  document.getElementById('ai_confirm').onclick = async ()=>{
+    const day = WORKDAYS.find(d=>d.id===ACTIVE_DAY_ID);
+    const pct = parseInt(slider.value);
+    const v = Math.round(capV*(pct/100)*10)/10;
+    day.loads.push({id:uid(), volume:v, sortiment:getSortiments()[getSortiments().length-1], destination:'', comment:'AI kiirhinnang ('+pct+'% täidetud)', time:new Date().toISOString()});
+    await persistAll();
+    el.remove();
+    toast('Lisatud hinnang: '+fmt(v)+' tm');
+    render();
+  };
+}
+
+async function finishDay(){
+  const day = WORKDAYS.find(d=>d.id===ACTIVE_DAY_ID);
+  day.status='done'; day.endTime = new Date().toISOString();
+  await persistAll();
+  await checkAchievements();
+  const lankId = day.lankId;
+  toast('Tööpäev lõpetatud ✓');
+  ACTIVE_DAY_ID = null;
+  ACTIVE_LANK_ID = lankId;
+  render();
+}
+async function finishLank(){
+  const day = WORKDAYS.find(d=>d.id===ACTIVE_DAY_ID);
+  const lankId = day ? day.lankId : ACTIVE_LANK_ID;
+  const lank = LANKS.find(l=>l.id===lankId);
+  if(!lank) return;
+  if(day && day.status==='active'){ day.status='done'; day.endTime=new Date().toISOString(); }
+  lank.status='done'; lank.doneDate = todayStr();
+  await persistAll();
+  await checkAchievements();
+  toast('Lank märgitud valmis 🏁');
+  ACTIVE_DAY_ID = null; ACTIVE_LANK_ID = null;
+  render();
+}
+
+/* ---------------- Stats tab ---------------- */
+function statsHTML(){
+  const s = computeStats();
+  const breakdown = sortimentBreakdown();
+  const maxB = Math.max(1, ...Object.values(breakdown));
+  return `
+  <div class="topbar"><div><div class="eyebrow">Ülevaade</div><div class="pagetitle">Statistika</div></div></div>
+  <div class="grid2">
+    <div class="statbox"><div class="num">${fmt(s.totalVolume,0)}</div><div class="lbl">Kokku tm</div></div>
+    <div class="statbox"><div class="num">${s.totalDays}</div><div class="lbl">Tööpäeva</div></div>
+    <div class="statbox"><div class="num">${fmt(s.avgDay)}</div><div class="lbl">Keskmine päev</div></div>
+    <div class="statbox"><div class="num">${fmt(s.maxDay)}</div><div class="lbl">Suurim päev</div></div>
+    <div class="statbox"><div class="num">${s.doneLanks}</div><div class="lbl">Valmis lanki</div></div>
+    <div class="statbox"><div class="num">${fmt(s.avgLank)}</div><div class="lbl">Keskmine lank</div></div>
+    ${s.totalLoads>0 ? `<div class="statbox"><div class="num">${s.totalLoads}</div><div class="lbl">Koormaid kokku</div></div>
+    <div class="statbox"><div class="num">${fmt(s.avgLoad)}</div><div class="lbl">Keskm. koorem</div></div>` : ''}
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <h3 style="font-size:16px; margin-bottom:10px;">Sortimendid</h3>
+    ${Object.keys(breakdown).length===0? `<div class="empty">Andmeid pole veel</div>` :
+      Object.entries(breakdown).sort((a,b)=>b[1]-a[1]).map(([name,v])=>`
+      <div style="margin-bottom:10px;">
+        <div class="row"><span class="small">${name}</span><span class="small" style="color:var(--amber-hi); font-weight:700;">${fmt(v)} tm</span></div>
+        <div style="height:8px; background:var(--bg-elev); border-radius:4px; overflow:hidden; margin-top:4px;">
+          <div style="height:100%; width:${(v/maxB*100)}%; background:linear-gradient(90deg, var(--pine), var(--pine-hi));"></div>
+        </div>
+      </div>`).join('')}
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:16px; margin-bottom:6px;">Saavutused</h3>
+    <div class="divider"></div>
+    <div class="ach-grid">
+      ${ACHIEVEMENTS.map(a=>{
+        const unlocked = a.check(s);
+        return `<div class="ach ${unlocked?'':'locked'}"><div class="ico">${a.ico}</div><div class="t">${a.t}</div></div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+async function checkAchievements(){
+  const s = computeStats();
+  const seen = (await sGet('achievements-seen', false)) || [];
+  const newly = ACHIEVEMENTS.filter(a=>a.check(s) && !seen.includes(a.id));
+  if(newly.length){
+    toast('🏆 Uus saavutus: '+newly[0].t);
+    await sSet('achievements-seen', [...seen, ...newly.map(a=>a.id)], false);
+  }
+}
+
+/* ---------------- Leaderboard tab ---------------- */
+let LB_SORT = 'totalVolume';
+async function loadLeaderboard(){
+  const keys = await sListKeys('leaderboard:', true);
+  const entries = [];
+  for(const k of keys){
+    try{ const r = await window.storage.get(k, true); if(r) entries.push(JSON.parse(r.value)); }catch(e){}
+  }
+  window.__lbEntries = entries;
+  renderLeaderboard();
+}
+function renderLeaderboard(){
+  const container = document.getElementById('lbContainer');
+  if(!container) return;
+  const entries = (window.__lbEntries||[]).slice().sort((a,b)=>(b[LB_SORT]||0)-(a[LB_SORT]||0));
+  const sortLabels = {totalVolume:'Kõik ajad', today:'Täna', week:'Nädal', month:'Kuu', year:'Aasta', doneLanks:'Valmis langid'};
+  container.outerHTML = `
+  <div id="lbContainer">
+    <div class="chip-row" style="margin-bottom:12px;" id="lbSortRow">
+      ${Object.entries(sortLabels).map(([k,l])=>`<button type="button" class="chip ${LB_SORT===k?'active':''}" data-k="${k}">${l}</button>`).join('')}
+    </div>
+    <div class="card">
+      ${entries.length===0? `<div class="empty"><div class="ico">🏆</div>Edetabel on veel tühi</div>` :
+      entries.map((e,i)=>{
+        const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+        const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
+        const isMe = PROFILE && e.username===PROFILE.username;
+        return `<div class="lb-row" style="${isMe?'background:rgba(232,135,30,0.08); border-radius:8px; padding-left:6px;':''}">
+          <div class="lb-rank ${rankClass}">${medal}</div>
+          <div>
+            <div class="lb-name">${e.name} ${e.role==='Harvesterijuht'?'🌲':'🚛'}</div>
+            <div class="lb-sub">${e.machine||''}</div>
+          </div>
+          <div class="lb-vol">${fmt(e[LB_SORT]||0,0)} ${LB_SORT==='doneLanks'?'':'tm'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+  document.getElementById('lbSortRow').querySelectorAll('.chip').forEach(c=>{
+    c.onclick = ()=>{ LB_SORT = c.dataset.k; renderLeaderboard(); };
+  });
+}
+
+/* ---------------- Profile tab ---------------- */
+function profileHTML(){
+  const s = computeStats();
+  return `
+  <div class="topbar"><div><div class="eyebrow">Avalik profiil</div><div class="pagetitle">Profiil</div></div></div>
+  <div class="card" style="text-align:center;">
+    <div style="width:70px; height:70px; border-radius:50%; background:linear-gradient(135deg,var(--pine),var(--pine-hi)); display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-family:'Barlow Condensed'; font-weight:800; font-size:26px;">${PROFILE.firstName[0]}${PROFILE.lastName[0]}</div>
+    <h2 style="font-size:22px;">${PROFILE.firstName} ${PROFILE.lastName}</h2>
+    <span class="pill ${PROFILE.role==='Harvesterijuht'?'role-h':'role-f'}">${PROFILE.role==='Harvesterijuht'?'🌲 HARVESTERIJUHT':'🚛 FORVARDERIJUHT'}</span>
+    <div class="divider"></div>
+    <div class="row" style="text-align:left;">
+      <div class="small">Masin</div><div class="small" style="color:var(--text);">${PROFILE.manufacturer} ${PROFILE.model} ${PROFILE.year?'('+PROFILE.year+')':''}</div>
+    </div>
+    <div class="row" style="text-align:left; margin-top:6px;">
+      <div class="small">Ettevõte</div><div class="small" style="color:var(--text);">${PROFILE.company||'—'}</div>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="statbox"><div class="num">${s.doneLanks}</div><div class="lbl">Lanki</div></div>
+    <div class="statbox"><div class="num">${fmt(s.totalVolume,0)}</div><div class="lbl">tm kokku</div></div>
+    <div class="statbox"><div class="num">${s.totalDays}</div><div class="lbl">Tööpäeva</div></div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:16px; margin-bottom:8px;">Konto andmed</h3>
+    <div class="divider"></div>
+    <div class="field"><label>Kasutajanimi</label><input value="@${PROFILE.username}" disabled></div>
+    <div class="field"><label>E-post</label><input value="${PROFILE.email||''}" disabled></div>
+    <div class="field"><label>Telefon</label><input value="${PROFILE.phone||''}" disabled></div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:16px; margin-bottom:8px;">Sortimendid</h3>
+    <div class="divider"></div>
+    <div class="chip-row">
+      ${getSortiments().map(s=>`<span class="chip">${s}</span>`).join('')}
+      <button type="button" class="chip addchip" id="profileAddSortBtn">+ Uus</button>
+    </div>
+  </div>
+
+  <button class="btn btn-ghost" id="switchMachineBtn" style="margin-bottom:10px;">🔧 Vaheta rolli / masinat</button>
+  `;
+}
+
+/* ---------------- Global attach ---------------- */
+function attachGlobal(){
+  document.getElementById('profileAddSortBtn')?.addEventListener('click', async ()=>{
+    const name = prompt('Uue sortimendi nimi:');
+    if(name && name.trim()){
+      if(!PROFILE.sortiments) PROFILE.sortiments = [...SORTIMENTS_DEFAULT];
+      if(!PROFILE.sortiments.includes(name.trim())) PROFILE.sortiments.push(name.trim());
+      await saveProfile();
+      toast('Sortiment lisatud');
+      render();
+    }
+  });
+
+  document.getElementById('switchMachineBtn')?.addEventListener('click', ()=>{
+    let role = PROFILE.role;
+    const el = document.createElement('div');
+    el.className='modal-bg'; el.id='switchModal';
+    el.innerHTML = `<div class="modal">
+      <div class="modal-handle"></div>
+      <h2 style="font-size:20px;">Vaheta rolli / masinat</h2>
+      <p class="small">Sinu statistika ja tööajalugu jäävad alles. See muudab sinu peamist rolli — üksikutel tööpäevadel saad rolli ikka eraldi valida.</p>
+      <div class="field"><label>Peamine amet</label>
+        <div class="chip-row" id="sw_role">
+          <button type="button" class="chip ${role==='Harvesterijuht'?'active':''}" data-r="Harvesterijuht">🌲 Harvesterijuht</button>
+          <button type="button" class="chip ${role==='Forvarderijuht'?'active':''}" data-r="Forvarderijuht">🚛 Forvarderijuht</button>
+        </div>
+      </div>
+      <div class="field"><label>Tootja</label><select id="sw_manu"></select></div>
+      <div class="field"><label>Mudel</label><select id="sw_model"></select></div>
+      <div class="field"><label>Aasta</label><input id="sw_year" type="number" value="${PROFILE.year||''}"></div>
+      <div class="row" style="gap:10px;">
+        <button class="btn btn-ghost" onclick="document.getElementById('switchModal').remove()">Loobu</button>
+        <button class="btn btn-primary" id="sw_save">Salvesta</button>
+      </div>
+    </div>`;
+    document.body.appendChild(el);
+    const manuSel = document.getElementById('sw_manu'), modelSel = document.getElementById('sw_model');
+    function refreshManu(){
+      const src = role==='Harvesterijuht' ? HARVESTERS : FORVARDERS;
+      manuSel.innerHTML = Object.keys(src).map(m=>`<option ${m===PROFILE.manufacturer?'selected':''}>${m}</option>`).join('');
+      refreshModel();
+    }
+    function refreshModel(){
+      const src = role==='Harvesterijuht' ? HARVESTERS : FORVARDERS;
+      modelSel.innerHTML = (src[manuSel.value]||[]).map(m=>`<option ${m===PROFILE.model?'selected':''}>${m}</option>`).join('');
+    }
+    manuSel.onchange = refreshModel;
+    document.getElementById('sw_role').querySelectorAll('.chip').forEach(c=>{
+      c.onclick=()=>{ document.querySelectorAll('#sw_role .chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); role=c.dataset.r; refreshManu(); };
+    });
+    refreshManu();
+    document.getElementById('sw_save').onclick = async ()=>{
+      PROFILE.role = role; PROFILE.manufacturer = manuSel.value; PROFILE.model = modelSel.value; PROFILE.year = document.getElementById('sw_year').value;
+      await saveProfile(); el.remove(); toast('Profiil uuendatud'); render();
+    };
+  });
+}
+
+/* ---------------- Migration (old data format) ---------------- */
+async function migrateIfNeeded(){
+  let changed = false;
+  for(const d of WORKDAYS){
+    if(!d.lankId && d.lank){
+      let existing = LANKS.find(l=>l.name===d.lank);
+      if(!existing){
+        existing = {id: uid(), name:d.lank, company:d.company||'', forestDistrict:d.forestDistrict||'', location:d.location||null, notes:d.notes||'', status: d.status==='done'?'done':'active', createdDate:d.date, doneDate: d.status==='done'? d.date: null};
+        LANKS.push(existing);
+      }
+      d.lankId = existing.id;
+      changed = true;
+    }
+  }
+  if(PROFILE && !PROFILE.sortiments){ PROFILE.sortiments = [...SORTIMENTS_DEFAULT]; changed = true; }
+  if(changed){ await persistAll(); if(PROFILE) await saveProfile(); }
+}
+
+/* ---------------- Init ---------------- */
+async function init(){
+  document.getElementById('screen').innerHTML = `<div class="empty" style="padding-top:80px;"><div class="ico">🌲</div>Laen ForestTrack AI...</div>`;
+  PROFILE = await sGet('profile', false);
+  LANKS = (await sGet('lanks', false)) || [];
+  WORKDAYS = (await sGet('workdays', false)) || [];
+  await migrateIfNeeded();
+  render();
+}
+init();
+</script>
+</body>
+</html>
