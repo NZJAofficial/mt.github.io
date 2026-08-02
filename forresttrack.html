@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>ForestTrack AI</title>
+<title>MT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -297,7 +297,7 @@ async function render(){
 /* ---------------- Onboarding ---------------- */
 function onboardingHTML(){
   return `
-  <div class="topbar"><div><div class="eyebrow">Tere tulemast</div><div class="pagetitle">ForestTrack AI</div></div></div>
+  <div class="topbar"><div><div class="eyebrow">Tere tulemast</div><div class="pagetitle">MT</div></div></div>
   <div class="card">
     <p class="small">Loo oma profiil, et alustada tööpäeviku pidamist.</p>
     <div class="field"><label>Eesnimi</label><input id="ob_first" placeholder="Markus"></div>
@@ -1192,7 +1192,7 @@ async function migrateIfNeeded(){
 
 /* ---------------- Init ---------------- */
 async function init(){
-  document.getElementById('screen').innerHTML = `<div class="empty" style="padding-top:80px;"><div class="ico">🌲</div>Laen ForestTrack AI...</div>`;
+  document.getElementById('screen').innerHTML = `<div class="empty" style="padding-top:80px;"><div class="ico">🌲</div>Laen MT...</div>`;
   PROFILE = await sGet('profile', false);
   LANKS = (await sGet('lanks', false)) || [];
   WORKDAYS = (await sGet('workdays', false)) || [];
