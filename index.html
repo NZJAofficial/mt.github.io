@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>MT</title>
+<title>ForestTrack AI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -163,6 +163,7 @@ async function sListKeys(prefix, shared=false){
 }
 
 /* ---------------- App state ---------------- */
+let CURRENT_USER = null;
 let PROFILE = null;
 let LANKS = [];
 let WORKDAYS = [];
@@ -170,20 +171,33 @@ let ACTIVE_TAB = 'home';
 let ACTIVE_DAY_ID = null;
 let ACTIVE_LANK_ID = null;
 
-const SORTIMENTS_DEFAULT = ['Kuusepalk','Männipalk','Kasepalk','Paberipuit','Küttepuit','Muu'];
+const SORTIMENTS_DEFAULT = [
+  {name:'Kuusepalk', coefficient:1.0},
+  {name:'Männipalk', coefficient:1.0},
+  {name:'Kasepalk', coefficient:1.0},
+  {name:'Paberipuit', coefficient:1.0},
+  {name:'Küttepuit', coefficient:1.0},
+  {name:'Muu', coefficient:1.0}
+];
+
 const HARVESTERS = {'John Deere':['1070G','1170G','1270G','1470G'], 'Ponsse':['Scorpion','Ergo','Cobra'], 'Komatsu':['901','911','931']};
 const FORVARDERS = {'John Deere':['810G','910G','1110G','1510G'], 'Ponsse':['Buffalo','Elephant','Wisent'], 'Komatsu':['845','855','875']};
 
-function getSortiments(){ return (PROFILE && PROFILE.sortiments && PROFILE.sortiments.length) ? PROFILE.sortiments : SORTIMENTS_DEFAULT; }
-
-const ACHIEVEMENTS = [
-  {id:'v100', ico:'🌱', t:'Esimene 100 tm', check:s=>s.totalVolume>=100},
-  {id:'v1000', ico:'🪓', t:'1000 tm', check:s=>s.totalVolume>=1000},
-  {id:'v10000', ico:'🏆', t:'10 000 tm', check:s=>s.totalVolume>=10000},
-  {id:'lank100', ico:'🌲', t:'100 valmis lanki', check:s=>s.doneLanks>=100},
-  {id:'days50', ico:'📅', t:'50 tööpäeva', check:s=>s.totalDays>=50},
-  {id:'loads5000', ico:'🚛', t:'5000 koormat', check:s=>s.totalLoads>=5000},
-];
+function getSortiments(){
+  let list = (PROFILE && PROFILE.sortiments && Array.isArray(PROFILE.sortiments)) ? PROFILE.sortiments : SORTIMENTS_DEFAULT;
+  // migrate old string array
+  if(list.length && typeof list[0] === 'string'){
+    list = list.map(name => ({name, coefficient:1.0}));
+    if(PROFILE) PROFILE.sortiments = list;
+  }
+  return list;
+}
+function getSortimentNames(){ return getSortiments().map(s => s.name); }
+function getCoefficient(name){
+  const list = getSortiments();
+  const item = list.find(s => s.name === name);
+  return item ? (item.coefficient || 1.0) : 1.0;
+}
 
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
@@ -231,19 +245,19 @@ function sortimentBreakdown(){
   return map;
 }
 
-async function saveProfile(){ await sSet('profile', PROFILE, false); }
+async function saveProfile(){ if(PROFILE) await sSet('profile:'+CURRENT_USER, PROFILE, false); }
 async function persistAll(){
-  await sSet('lanks', LANKS, false);
-  await sSet('workdays', WORKDAYS, false);
+  await sSet('lanks:'+CURRENT_USER, LANKS, false);
+  await sSet('workdays:'+CURRENT_USER, WORKDAYS, false);
   await syncLeaderboard();
 }
 
 async function syncLeaderboard(){
-  if(!PROFILE) return;
+  if(!PROFILE || !CURRENT_USER) return;
   const s = computeStats();
   const entry = {
+    username: CURRENT_USER,
     name: PROFILE.firstName+' '+PROFILE.lastName,
-    username: PROFILE.username,
     role: PROFILE.role,
     machine: PROFILE.manufacturer+' '+PROFILE.model,
     totalVolume: s.totalVolume,
@@ -251,7 +265,7 @@ async function syncLeaderboard(){
     doneLanks: s.doneLanks, avgDay: s.avgDay, avgLoad: s.avgLoad,
     updated: Date.now()
   };
-  await sSet('leaderboard:'+PROFILE.username, entry, true);
+  await sSet('leaderboard:'+CURRENT_USER, entry, true);
 }
 
 function toast(msg){
@@ -274,6 +288,7 @@ const ICONS = {
 function setTab(t){ ACTIVE_TAB = t; ACTIVE_LANK_ID = null; render(); }
 
 function renderTabbar(){
+  if(!CURRENT_USER){ document.getElementById('tabbar').innerHTML = ''; return; }
   const tabs = [['home','Kodu'],['work','Töö'],['stats','Statistika'],['board','Edetabel'],['profile','Profiil']];
   document.getElementById('tabbar').innerHTML = tabs.map(([id,label])=>`
     <button class="tab ${ACTIVE_TAB===id?'active':''}" onclick="setTab('${id}')">${ICONS[id]}<span>${label}</span></button>
@@ -283,6 +298,11 @@ function renderTabbar(){
 async function render(){
   renderTabbar();
   const el = document.getElementById('screen');
+  if(!CURRENT_USER){
+    el.innerHTML = loginHTML();
+    attachLogin();
+    return;
+  }
   if(!PROFILE){ el.innerHTML = onboardingHTML(); attachOnboarding(); return; }
   if(ACTIVE_DAY_ID){ el.innerHTML = activeDayHTML(); attachActiveDay(); return; }
   if(ACTIVE_LANK_ID){ el.innerHTML = lankDetailHTML(); attachLankDetail(); return; }
@@ -294,15 +314,77 @@ async function render(){
   attachGlobal();
 }
 
+/* ---------------- Login ---------------- */
+function loginHTML(){
+  return `
+  <div style="display:flex;flex-direction:column;justify-content:center;min-height:70vh;padding:20px 0;">
+    <div style="text-align:center;margin-bottom:30px;">
+      <div style="font-size:48px;">🌲</div>
+      <h1 class="pagetitle" style="font-size:32px;">ForestTrack AI</h1>
+      <div class="small">Metsanduse tööpäevik</div>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label>Kasutajanimi</label>
+        <input id="login_user" placeholder="Sinu kasutajanimi" autocomplete="username">
+      </div>
+      <button class="btn btn-primary" id="login_btn">Logi sisse</button>
+      <div style="text-align:center;margin-top:10px;">
+        <button class="btn btn-ghost btn-sm" id="login_new">+ Loo uus kasutaja</button>
+      </div>
+      <div id="login_error" class="tiny" style="color:var(--danger);margin-top:8px;text-align:center;"></div>
+    </div>
+  </div>`;
+}
+function attachLogin(){
+  document.getElementById('login_btn').onclick = async ()=>{
+    const username = document.getElementById('login_user').value.trim();
+    if(!username){ document.getElementById('login_error').textContent = 'Palun sisesta kasutajanimi'; return; }
+    await loginUser(username);
+  };
+  document.getElementById('login_user').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login_btn').click(); });
+  document.getElementById('login_new').onclick = async ()=>{
+    const username = document.getElementById('login_user').value.trim() || 'kasutaja_'+(Math.random().toString(36).slice(2,6));
+    await loginUser(username, true);
+  };
+}
+async function loginUser(username, create=false){
+  const users = await sGet('users', false) || [];
+  if(!users.includes(username)){
+    if(!create){ document.getElementById('login_error').textContent = 'Kasutajat ei leitud'; return; }
+    users.push(username);
+    await sSet('users', users, false);
+    // create empty profile later
+  }
+  CURRENT_USER = username;
+  window.localStorage.setItem('lastForestUser', username);
+  // load data
+  PROFILE = await sGet('profile:'+username, false);
+  LANKS = (await sGet('lanks:'+username, false)) || [];
+  WORKDAYS = (await sGet('workdays:'+username, false)) || [];
+  await migrateIfNeeded();
+  // if no profile, show onboarding
+  render();
+}
+async function logoutUser(){
+  CURRENT_USER = null;
+  PROFILE = null;
+  LANKS = [];
+  WORKDAYS = [];
+  ACTIVE_DAY_ID = null;
+  ACTIVE_LANK_ID = null;
+  window.localStorage.removeItem('lastForestUser');
+  render();
+}
+
 /* ---------------- Onboarding ---------------- */
 function onboardingHTML(){
   return `
-  <div class="topbar"><div><div class="eyebrow">Tere tulemast</div><div class="pagetitle">MT</div></div></div>
+  <div class="topbar"><div><div class="eyebrow">Tere tulemast, ${CURRENT_USER}</div><div class="pagetitle">ForestTrack AI</div></div></div>
   <div class="card">
     <p class="small">Loo oma profiil, et alustada tööpäeviku pidamist.</p>
     <div class="field"><label>Eesnimi</label><input id="ob_first" placeholder="Markus"></div>
     <div class="field"><label>Perekonnanimi</label><input id="ob_last" placeholder="Mägi"></div>
-    <div class="field"><label>Kasutajanimi</label><input id="ob_user" placeholder="markusm"></div>
     <div class="field"><label>E-post</label><input id="ob_email" type="email" placeholder="markus@metsa.ee"></div>
     <div class="field"><label>Telefon (valikuline)</label><input id="ob_phone" placeholder="+372 5..."></div>
     <div class="field"><label>Ettevõte</label><input id="ob_company" placeholder="Metsa OÜ"></div>
@@ -312,7 +394,7 @@ function onboardingHTML(){
         <button type="button" class="chip active" data-role="Harvesterijuht">🌲 Harvesterijuht</button>
         <button type="button" class="chip" data-role="Forvarderijuht">🚛 Forvarderijuht</button>
       </div>
-      <div class="tiny" style="margin-top:6px;">Saad hiljem iga tööpäeva puhul rolli vahetada, kui juhid mõlemat masinat.</div>
+      <div class="tiny" style="margin-top:6px;">Saad hiljem iga tööpäeva puhul rolli vahetada.</div>
     </div>
     <div class="divider"></div>
     <div class="field"><label>Masina tootja</label>
@@ -320,6 +402,14 @@ function onboardingHTML(){
     </div>
     <div class="field"><label>Mudel</label><select id="ob_model"></select></div>
     <div class="field"><label>Aasta</label><input id="ob_year" type="number" placeholder="2022" min="1990" max="2026"></div>
+    <div class="field">
+      <label>Sortimendid (koos koefitsiendiga)</label>
+      <div class="chip-row" id="ob_sort_list">
+        ${getSortiments().map(s => `<span class="chip">${s.name} (${fmt(s.coefficient,2)})</span>`).join('')}
+        <button type="button" class="chip addchip" id="ob_add_sort">+ Lisa</button>
+      </div>
+      <div class="tiny">Koefitsient korrutatakse sisestatud kogusega → tihumeetrid</div>
+    </div>
     <button class="btn btn-primary" id="ob_submit" style="margin-top:6px;">Loo profiil</button>
   </div>`;
 }
@@ -344,20 +434,33 @@ function attachOnboarding(){
   });
   refreshMachines();
 
+  document.getElementById('ob_add_sort').onclick = ()=>{
+    const name = prompt('Sortimendi nimi:');
+    if(!name) return;
+    const coef = parseFloat(prompt('Koefitsient (vaikimisi 1.0):') || '1.0');
+    if(isNaN(coef) || coef<=0){ toast('Sisesta kehtiv koefitsient'); return; }
+    const list = getSortiments();
+    if(list.find(s=>s.name===name)){ toast('Selline sortiment on juba olemas'); return; }
+    list.push({name, coefficient:coef});
+    PROFILE.sortiments = list;
+    saveProfile();
+    render();
+  };
+
   document.getElementById('ob_submit').onclick = async ()=>{
     const firstName = document.getElementById('ob_first').value.trim();
     const lastName = document.getElementById('ob_last').value.trim();
-    const username = document.getElementById('ob_user').value.trim() || (firstName+lastName).toLowerCase();
     if(!firstName || !lastName){ toast('Palun sisesta nimi'); return; }
     PROFILE = {
-      firstName, lastName, username,
+      firstName, lastName,
+      username: CURRENT_USER,
       email: document.getElementById('ob_email').value.trim(),
       phone: document.getElementById('ob_phone').value.trim(),
       company: document.getElementById('ob_company').value.trim(),
       role,
       manufacturer: manuSel.value, model: modelSel.value, year: document.getElementById('ob_year').value || '',
       compartment: null,
-      sortiments: [...SORTIMENTS_DEFAULT],
+      sortiments: getSortiments(), // already from default
     };
     await saveProfile();
     await persistAll();
@@ -393,6 +496,7 @@ function homeHTML(){
       <div class="eyebrow">${PROFILE.role==='Harvesterijuht'?'🌲 Harvesterijuht':'🚛 Forvarderijuht'}</div>
       <div class="pagetitle">Tere, ${PROFILE.firstName}</div>
     </div>
+    <button class="btn-ghost btn btn-sm" style="width:auto;" onclick="logoutUser()">🚪</button>
   </div>
 
   ${active ? `
@@ -441,7 +545,7 @@ function recentLanksHTML(){
     </div>`).join('');
 }
 
-/* ---------------- Work tab (lank list + start) ---------------- */
+/* ---------------- Work tab ---------------- */
 function workTabHTML(){
   const list = [...LANKS].sort((a,b)=>b.createdDate.localeCompare(a.createdDate));
   const active = activeWorkday();
@@ -601,7 +705,7 @@ function openLankSmart(lankId){
   if(d){ openDay(d.id); } else { openLank(lankId); }
 }
 
-/* ---------------- Lank detail (history) screen ---------------- */
+/* ---------------- Lank detail ---------------- */
 function lankDetailHTML(){
   const lank = LANKS.find(l=>l.id===ACTIVE_LANK_ID);
   if(!lank){ ACTIVE_LANK_ID=null; return workTabHTML(); }
@@ -698,7 +802,7 @@ function continueLank(lank){
   };
 }
 
-/* ---------------- Active day screen (session recording) ---------------- */
+/* ---------------- Active day screen ---------------- */
 function activeDayHTML(){
   const day = WORKDAYS.find(d=>d.id===ACTIVE_DAY_ID);
   if(!day){ ACTIVE_DAY_ID=null; return homeHTML(); }
@@ -749,8 +853,9 @@ function entriesListHTML(day, isHarv){
 }
 
 function sortimentChipsHTML(containerId, currentDefault){
+  const names = getSortimentNames();
   return `<div class="chip-row" id="${containerId}">
-    ${getSortiments().map((s,i)=>`<button type="button" class="chip ${s===currentDefault?'active':''}" data-s="${s}">${s}</button>`).join('')}
+    ${names.map((s,i)=>`<button type="button" class="chip ${s===currentDefault?'active':''}" data-s="${s}">${s}</button>`).join('')}
     <button type="button" class="chip addchip" id="${containerId}_add">+ Uus</button>
   </div>`;
 }
@@ -759,13 +864,15 @@ function harvesterPanel(day){
   return `
   <div class="card">
     <h3 style="font-size:16px;">Lisa lõigatud maht</h3>
+    <p class="tiny">Sisesta kogus (nt m³) ja vali sortiment – tulemus salvestatakse tihumeetrites.</p>
     <div class="field" style="margin-top:10px;"><label>Sortiment</label>
-      ${sortimentChipsHTML('h_sort', getSortiments()[0])}
+      ${sortimentChipsHTML('h_sort', getSortimentNames()[0])}
     </div>
     <div class="numpad-display" id="h_display">0.0</div>
     <div class="numpad" id="h_numpad">
       ${['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(k=>`<button type="button" class="numkey" data-k="${k}">${k}</button>`).join('')}
     </div>
+    <div id="h_coef_info" class="tiny" style="text-align:center;margin:4px 0;">Koefitsient: 1.00</div>
     <button class="btn btn-primary" id="h_add" style="margin-top:10px;">+ Lisa maht (tm)</button>
   </div>`;
 }
@@ -781,14 +888,16 @@ function forvarderPanel(day){
   return `
   <div class="card">
     <h3 style="font-size:16px;">Lisa koorem</h3>
+    <p class="tiny">Sisesta kogus (nt m³) ja vali sortiment – tulemus salvestatakse tihumeetrites.</p>
     <div class="tiny" style="margin-top:4px;">Koormaruumi maht: ${fmt(compartmentVolume())} m³</div>
     <div class="field" style="margin-top:10px;"><label>Sortiment</label>
-      ${sortimentChipsHTML('f_sort', getSortiments()[0])}
+      ${sortimentChipsHTML('f_sort', getSortimentNames()[0])}
     </div>
     <div class="numpad-display" id="f_display">0.0</div>
     <div class="numpad" id="f_numpad">
       ${['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(k=>`<button type="button" class="numkey" data-k="${k}">${k}</button>`).join('')}
     </div>
+    <div id="f_coef_info" class="tiny" style="text-align:center;margin:4px 0;">Koefitsient: 1.00</div>
     <div class="field" style="margin-top:10px;"><label>Sihtkoht (nt Virn 3)</label><input id="f_dest" placeholder="Virn 3"></div>
     <div class="field"><label>Kommentaar</label><input id="f_comment" placeholder="valikuline, nt märg puit"></div>
     <button class="btn btn-primary" id="f_add">+ Lisa koorem</button>
@@ -824,22 +933,37 @@ function attachActiveDay(){
 function attachAddSortiment(btnId){
   document.getElementById(btnId)?.addEventListener('click', async ()=>{
     const name = prompt('Uue sortimendi nimi:');
-    if(name && name.trim()){
-      if(!PROFILE.sortiments) PROFILE.sortiments = [...SORTIMENTS_DEFAULT];
-      if(!PROFILE.sortiments.includes(name.trim())) PROFILE.sortiments.push(name.trim());
-      await saveProfile();
-      toast('Sortiment lisatud');
-      render();
-    }
+    if(!name) return;
+    const coef = parseFloat(prompt('Koefitsient (vaikimisi 1.0):') || '1.0');
+    if(isNaN(coef) || coef<=0){ toast('Sisesta kehtiv koefitsient'); return; }
+    const list = getSortiments();
+    if(list.find(s=>s.name===name)){ toast('Selline sortiment on juba olemas'); return; }
+    list.push({name, coefficient:coef});
+    PROFILE.sortiments = list;
+    await saveProfile();
+    toast('Sortiment lisatud');
+    render();
   });
 }
 function setupNumpad(prefix, day, isForvarder){
   let val = '0';
-  let sort = getSortiments()[0];
+  let sort = getSortimentNames()[0];
   const display = document.getElementById(prefix+'_display');
+  const coefInfo = document.getElementById(prefix+'_coef_info');
+
+  function updateCoefInfo(){
+    const coef = getCoefficient(sort);
+    coefInfo.textContent = 'Koefitsient: '+fmt(coef,2);
+  }
   document.getElementById(prefix+'_sort').querySelectorAll('.chip:not(.addchip)').forEach(c=>{
-    c.onclick = ()=>{ document.querySelectorAll('#'+prefix+'_sort .chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); sort=c.dataset.s; };
+    c.onclick = ()=>{
+      document.querySelectorAll('#'+prefix+'_sort .chip').forEach(x=>x.classList.remove('active')); c.classList.add('active');
+      sort = c.dataset.s;
+      updateCoefInfo();
+    };
   });
+  updateCoefInfo();
+
   document.getElementById(prefix+'_numpad').querySelectorAll('.numkey').forEach(k=>{
     k.onclick = ()=>{
       const key = k.dataset.k;
@@ -850,18 +974,20 @@ function setupNumpad(prefix, day, isForvarder){
     };
   });
   document.getElementById(prefix+'_add').onclick = async ()=>{
-    const v = parseFloat(val);
-    if(!v || v<=0){ toast('Sisesta kogus'); return; }
+    const raw = parseFloat(val);
+    if(!raw || raw<=0){ toast('Sisesta kogus'); return; }
+    const coef = getCoefficient(sort);
+    const tm = raw * coef;
     if(!isForvarder){
-      day.entries.push({id:uid(), volume:v, sortiment:sort, time:new Date().toISOString()});
+      day.entries.push({id:uid(), volume:tm, sortiment:sort, time:new Date().toISOString()});
     } else {
       const dest = document.getElementById('f_dest').value.trim();
       const comment = document.getElementById('f_comment').value.trim();
-      day.loads.push({id:uid(), volume:v, sortiment:sort, destination:dest, comment, time:new Date().toISOString()});
+      day.loads.push({id:uid(), volume:tm, sortiment:sort, destination:dest, comment, time:new Date().toISOString()});
     }
     await persistAll();
     val='0'; display.textContent='0.0';
-    toast('Lisatud: '+fmt(v)+' tm');
+    toast('Lisatud: '+fmt(raw)+' m³ → '+fmt(tm)+' tm (koef '+fmt(coef,2)+')');
     render();
   };
 }
@@ -942,7 +1068,8 @@ function openAiQuickEstimate(){
     const day = WORKDAYS.find(d=>d.id===ACTIVE_DAY_ID);
     const pct = parseInt(slider.value);
     const v = Math.round(capV*(pct/100)*10)/10;
-    day.loads.push({id:uid(), volume:v, sortiment:getSortiments()[getSortiments().length-1], destination:'', comment:'AI kiirhinnang ('+pct+'% täidetud)', time:new Date().toISOString()});
+    const sort = getSortimentNames()[getSortimentNames().length-1] || 'Muu';
+    day.loads.push({id:uid(), volume:v, sortiment:sort, destination:'', comment:'AI kiirhinnang ('+pct+'% täidetud)', time:new Date().toISOString()});
     await persistAll();
     el.remove();
     toast('Lisatud hinnang: '+fmt(v)+' tm');
@@ -975,11 +1102,12 @@ async function finishLank(){
   render();
 }
 
-/* ---------------- Stats tab ---------------- */
+/* ---------------- Stats ---------------- */
 function statsHTML(){
   const s = computeStats();
   const breakdown = sortimentBreakdown();
   const maxB = Math.max(1, ...Object.values(breakdown));
+  const sorted = Object.entries(breakdown).sort((a,b)=>b[1]-a[1]);
   return `
   <div class="topbar"><div><div class="eyebrow">Ülevaade</div><div class="pagetitle">Statistika</div></div></div>
   <div class="grid2">
@@ -995,8 +1123,8 @@ function statsHTML(){
 
   <div class="card" style="margin-top:14px;">
     <h3 style="font-size:16px; margin-bottom:10px;">Sortimendid</h3>
-    ${Object.keys(breakdown).length===0? `<div class="empty">Andmeid pole veel</div>` :
-      Object.entries(breakdown).sort((a,b)=>b[1]-a[1]).map(([name,v])=>`
+    ${sorted.length===0? `<div class="empty">Andmeid pole veel</div>` :
+      sorted.map(([name,v])=>`
       <div style="margin-bottom:10px;">
         <div class="row"><span class="small">${name}</span><span class="small" style="color:var(--amber-hi); font-weight:700;">${fmt(v)} tm</span></div>
         <div style="height:8px; background:var(--bg-elev); border-radius:4px; overflow:hidden; margin-top:4px;">
@@ -1016,17 +1144,25 @@ function statsHTML(){
     </div>
   </div>`;
 }
+const ACHIEVEMENTS = [
+  {id:'v100', ico:'🌱', t:'Esimene 100 tm', check:s=>s.totalVolume>=100},
+  {id:'v1000', ico:'🪓', t:'1000 tm', check:s=>s.totalVolume>=1000},
+  {id:'v10000', ico:'🏆', t:'10 000 tm', check:s=>s.totalVolume>=10000},
+  {id:'lank100', ico:'🌲', t:'100 valmis lanki', check:s=>s.doneLanks>=100},
+  {id:'days50', ico:'📅', t:'50 tööpäeva', check:s=>s.totalDays>=50},
+  {id:'loads5000', ico:'🚛', t:'5000 koormat', check:s=>s.totalLoads>=5000},
+];
 async function checkAchievements(){
   const s = computeStats();
-  const seen = (await sGet('achievements-seen', false)) || [];
+  const seen = (await sGet('achievements-seen:'+CURRENT_USER, false)) || [];
   const newly = ACHIEVEMENTS.filter(a=>a.check(s) && !seen.includes(a.id));
   if(newly.length){
     toast('🏆 Uus saavutus: '+newly[0].t);
-    await sSet('achievements-seen', [...seen, ...newly.map(a=>a.id)], false);
+    await sSet('achievements-seen:'+CURRENT_USER, [...seen, ...newly.map(a=>a.id)], false);
   }
 }
 
-/* ---------------- Leaderboard tab ---------------- */
+/* ---------------- Leaderboard ---------------- */
 let LB_SORT = 'totalVolume';
 async function loadLeaderboard(){
   const keys = await sListKeys('leaderboard:', true);
@@ -1052,7 +1188,7 @@ function renderLeaderboard(){
       entries.map((e,i)=>{
         const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
         const medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
-        const isMe = PROFILE && e.username===PROFILE.username;
+        const isMe = CURRENT_USER && e.username===CURRENT_USER;
         return `<div class="lb-row" style="${isMe?'background:rgba(232,135,30,0.08); border-radius:8px; padding-left:6px;':''}">
           <div class="lb-rank ${rankClass}">${medal}</div>
           <div>
@@ -1069,9 +1205,10 @@ function renderLeaderboard(){
   });
 }
 
-/* ---------------- Profile tab ---------------- */
+/* ---------------- Profile ---------------- */
 function profileHTML(){
   const s = computeStats();
+  const sortList = getSortiments();
   return `
   <div class="topbar"><div><div class="eyebrow">Avalik profiil</div><div class="pagetitle">Profiil</div></div></div>
   <div class="card" style="text-align:center;">
@@ -1094,37 +1231,41 @@ function profileHTML(){
   </div>
 
   <div class="card">
+    <h3 style="font-size:16px; margin-bottom:8px;">Sortimendid ja koefitsiendid</h3>
+    <div class="divider"></div>
+    <div class="chip-row">
+      ${sortList.map(s => `<span class="chip">${s.name} (${fmt(s.coefficient,2)})</span>`).join('')}
+      <button type="button" class="chip addchip" id="profileAddSortBtn">+ Lisa</button>
+    </div>
+    <div class="tiny" style="margin-top:6px;">Koefitsient × sisestatud kogus = tihumeetrid</div>
+  </div>
+
+  <div class="card">
     <h3 style="font-size:16px; margin-bottom:8px;">Konto andmed</h3>
     <div class="divider"></div>
-    <div class="field"><label>Kasutajanimi</label><input value="@${PROFILE.username}" disabled></div>
+    <div class="field"><label>Kasutajanimi</label><input value="@${CURRENT_USER}" disabled></div>
     <div class="field"><label>E-post</label><input value="${PROFILE.email||''}" disabled></div>
     <div class="field"><label>Telefon</label><input value="${PROFILE.phone||''}" disabled></div>
   </div>
 
-  <div class="card">
-    <h3 style="font-size:16px; margin-bottom:8px;">Sortimendid</h3>
-    <div class="divider"></div>
-    <div class="chip-row">
-      ${getSortiments().map(s=>`<span class="chip">${s}</span>`).join('')}
-      <button type="button" class="chip addchip" id="profileAddSortBtn">+ Uus</button>
-    </div>
-  </div>
-
   <button class="btn btn-ghost" id="switchMachineBtn" style="margin-bottom:10px;">🔧 Vaheta rolli / masinat</button>
+  <button class="btn btn-danger" onclick="logoutUser()">🚪 Logi välja</button>
   `;
 }
 
-/* ---------------- Global attach ---------------- */
 function attachGlobal(){
   document.getElementById('profileAddSortBtn')?.addEventListener('click', async ()=>{
     const name = prompt('Uue sortimendi nimi:');
-    if(name && name.trim()){
-      if(!PROFILE.sortiments) PROFILE.sortiments = [...SORTIMENTS_DEFAULT];
-      if(!PROFILE.sortiments.includes(name.trim())) PROFILE.sortiments.push(name.trim());
-      await saveProfile();
-      toast('Sortiment lisatud');
-      render();
-    }
+    if(!name) return;
+    const coef = parseFloat(prompt('Koefitsient (vaikimisi 1.0):') || '1.0');
+    if(isNaN(coef) || coef<=0){ toast('Sisesta kehtiv koefitsient'); return; }
+    const list = getSortiments();
+    if(list.find(s=>s.name===name)){ toast('Selline sortiment on juba olemas'); return; }
+    list.push({name, coefficient:coef});
+    PROFILE.sortiments = list;
+    await saveProfile();
+    toast('Sortiment lisatud');
+    render();
   });
 
   document.getElementById('switchMachineBtn')?.addEventListener('click', ()=>{
@@ -1134,7 +1275,7 @@ function attachGlobal(){
     el.innerHTML = `<div class="modal">
       <div class="modal-handle"></div>
       <h2 style="font-size:20px;">Vaheta rolli / masinat</h2>
-      <p class="small">Sinu statistika ja tööajalugu jäävad alles. See muudab sinu peamist rolli — üksikutel tööpäevadel saad rolli ikka eraldi valida.</p>
+      <p class="small">Sinu statistika ja tööajalugu jäävad alles. See muudab sinu peamist rolli.</p>
       <div class="field"><label>Peamine amet</label>
         <div class="chip-row" id="sw_role">
           <button type="button" class="chip ${role==='Harvesterijuht'?'active':''}" data-r="Harvesterijuht">🌲 Harvesterijuht</button>
@@ -1172,9 +1313,14 @@ function attachGlobal(){
   });
 }
 
-/* ---------------- Migration (old data format) ---------------- */
+/* ---------------- Migration ---------------- */
 async function migrateIfNeeded(){
   let changed = false;
+  // migrate sortiments
+  if(PROFILE && PROFILE.sortiments && Array.isArray(PROFILE.sortiments) && typeof PROFILE.sortiments[0] === 'string'){
+    PROFILE.sortiments = PROFILE.sortiments.map(name => ({name, coefficient:1.0}));
+    changed = true;
+  }
   for(const d of WORKDAYS){
     if(!d.lankId && d.lank){
       let existing = LANKS.find(l=>l.name===d.lank);
@@ -1186,17 +1332,22 @@ async function migrateIfNeeded(){
       changed = true;
     }
   }
-  if(PROFILE && !PROFILE.sortiments){ PROFILE.sortiments = [...SORTIMENTS_DEFAULT]; changed = true; }
+  if(PROFILE && !PROFILE.sortiments){ PROFILE.sortiments = SORTIMENTS_DEFAULT.slice(); changed = true; }
   if(changed){ await persistAll(); if(PROFILE) await saveProfile(); }
 }
 
 /* ---------------- Init ---------------- */
 async function init(){
-  document.getElementById('screen').innerHTML = `<div class="empty" style="padding-top:80px;"><div class="ico">🌲</div>Laen MT...</div>`;
-  PROFILE = await sGet('profile', false);
-  LANKS = (await sGet('lanks', false)) || [];
-  WORKDAYS = (await sGet('workdays', false)) || [];
-  await migrateIfNeeded();
+  document.getElementById('screen').innerHTML = `<div class="empty" style="padding-top:80px;"><div class="ico">🌲</div>Laen ForestTrack AI...</div>`;
+  // check last user
+  const last = window.localStorage.getItem('lastForestUser');
+  if(last){
+    const users = await sGet('users', false) || [];
+    if(users.includes(last)){
+      await loginUser(last);
+      return;
+    }
+  }
   render();
 }
 init();
