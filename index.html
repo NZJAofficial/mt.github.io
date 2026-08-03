@@ -161,6 +161,17 @@ async function sSet(key, val, shared=false){
 async function sListKeys(prefix, shared=false){
   try{ const r = await window.storage.list(prefix, shared); return r ? r.keys : []; }catch(e){ return []; }
 }
+async function sRemove(key, shared=false){
+  try{ await window.storage.remove(key, shared); }catch(e){}
+}
+
+/* ---------------- Password hashing (SHA-256) ---------------- */
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
 
 /* ---------------- App state ---------------- */
 let CURRENT_USER = null;
@@ -170,6 +181,7 @@ let WORKDAYS = [];
 let ACTIVE_TAB = 'home';
 let ACTIVE_DAY_ID = null;
 let ACTIVE_LANK_ID = null;
+const ADMIN_USER = 'admin';
 
 const SORTIMENTS_DEFAULT = [
   {name:'Kuusepalk', coefficient:1.0},
@@ -179,13 +191,13 @@ const SORTIMENTS_DEFAULT = [
   {name:'Küttepuit', coefficient:1.0},
   {name:'Muu', coefficient:1.0}
 ];
+const TREE_SPECIES_DEFAULT = ['Mänd','Kuusk','Kask','Haab','Tamm','Lehis','Saar'];
 
 const HARVESTERS = {'John Deere':['1070G','1170G','1270G','1470G'], 'Ponsse':['Scorpion','Ergo','Cobra'], 'Komatsu':['901','911','931']};
 const FORVARDERS = {'John Deere':['810G','910G','1110G','1510G'], 'Ponsse':['Buffalo','Elephant','Wisent'], 'Komatsu':['845','855','875']};
 
 function getSortiments(){
   let list = (PROFILE && PROFILE.sortiments && Array.isArray(PROFILE.sortiments)) ? PROFILE.sortiments : SORTIMENTS_DEFAULT;
-  // migrate old string array
   if(list.length && typeof list[0] === 'string'){
     list = list.map(name => ({name, coefficient:1.0}));
     if(PROFILE) PROFILE.sortiments = list;
@@ -197,6 +209,11 @@ function getCoefficient(name){
   const list = getSortiments();
   const item = list.find(s => s.name === name);
   return item ? (item.coefficient || 1.0) : 1.0;
+}
+
+function getTreeSpecies(){
+  let list = (PROFILE && PROFILE.treeSpecies) ? PROFILE.treeSpecies : TREE_SPECIES_DEFAULT;
+  return list;
 }
 
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
@@ -282,6 +299,7 @@ const ICONS = {
   stats:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg>',
   board:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6 6 1-4.5 4 1 6L12 16l-5.5 3 1-6L3 9l6-1z"/></svg>',
   profile:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+  admin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7v5c0 5 4 9 10 10 6-1 10-5 10-10V7l-10-5z"/><path d="M10 12l2 2 4-4"/></svg>'
 };
 
 /* ---------------- Router / render ---------------- */
@@ -290,8 +308,9 @@ function setTab(t){ ACTIVE_TAB = t; ACTIVE_LANK_ID = null; render(); }
 function renderTabbar(){
   if(!CURRENT_USER){ document.getElementById('tabbar').innerHTML = ''; return; }
   const tabs = [['home','Kodu'],['work','Töö'],['stats','Statistika'],['board','Edetabel'],['profile','Profiil']];
+  if(CURRENT_USER === ADMIN_USER) tabs.push(['admin','Admin']);
   document.getElementById('tabbar').innerHTML = tabs.map(([id,label])=>`
-    <button class="tab ${ACTIVE_TAB===id?'active':''}" onclick="setTab('${id}')">${ICONS[id]}<span>${label}</span></button>
+    <button class="tab ${ACTIVE_TAB===id?'active':''}" onclick="setTab('${id}')">${ICONS[id]||ICONS.home}<span>${label}</span></button>
   `).join('');
 }
 
@@ -302,6 +321,14 @@ async function render(){
     el.innerHTML = loginHTML();
     attachLogin();
     return;
+  }
+  // Admin has no profile – show admin panel
+  if(CURRENT_USER === ADMIN_USER){
+    if(ACTIVE_TAB === 'admin'){ el.innerHTML = adminHTML(); attachAdmin(); return; }
+    else { // default to admin view if not set
+      ACTIVE_TAB = 'admin';
+      el.innerHTML = adminHTML(); attachAdmin(); return;
+    }
   }
   if(!PROFILE){ el.innerHTML = onboardingHTML(); attachOnboarding(); return; }
   if(ACTIVE_DAY_ID){ el.innerHTML = activeDayHTML(); attachActiveDay(); return; }
@@ -314,7 +341,7 @@ async function render(){
   attachGlobal();
 }
 
-/* ---------------- Login ---------------- */
+/* ---------------- Login / Registration ---------------- */
 function loginHTML(){
   return `
   <div style="display:flex;flex-direction:column;justify-content:center;min-height:70vh;padding:20px 0;">
@@ -328,44 +355,122 @@ function loginHTML(){
         <label>Kasutajanimi</label>
         <input id="login_user" placeholder="Sinu kasutajanimi" autocomplete="username">
       </div>
+      <div class="field">
+        <label>Parool</label>
+        <input id="login_pass" type="password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <div id="login_error" class="tiny" style="color:var(--danger);margin-bottom:8px;text-align:center;"></div>
       <button class="btn btn-primary" id="login_btn">Logi sisse</button>
       <div style="text-align:center;margin-top:10px;">
         <button class="btn btn-ghost btn-sm" id="login_new">+ Loo uus kasutaja</button>
       </div>
-      <div id="login_error" class="tiny" style="color:var(--danger);margin-top:8px;text-align:center;"></div>
     </div>
   </div>`;
 }
 function attachLogin(){
   document.getElementById('login_btn').onclick = async ()=>{
     const username = document.getElementById('login_user').value.trim();
-    if(!username){ document.getElementById('login_error').textContent = 'Palun sisesta kasutajanimi'; return; }
-    await loginUser(username);
+    const password = document.getElementById('login_pass').value;
+    if(!username){ document.getElementById('login_error').textContent = 'Sisesta kasutajanimi'; return; }
+    if(!password){ document.getElementById('login_error').textContent = 'Sisesta parool'; return; }
+    const users = await sGet('users', false) || [];
+    if(!users.includes(username)){
+      document.getElementById('login_error').textContent = 'Kasutajat ei leitud';
+      return;
+    }
+    const storedHash = await sGet('pwhash:'+username, false);
+    if(!storedHash){
+      document.getElementById('login_error').textContent = 'Kasutaja parooli ei leitud';
+      return;
+    }
+    const hash = await hashPassword(password);
+    if(hash !== storedHash){
+      document.getElementById('login_error').textContent = 'Vale parool';
+      return;
+    }
+    await loginUser(username, false);
   };
   document.getElementById('login_user').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login_btn').click(); });
-  document.getElementById('login_new').onclick = async ()=>{
-    const username = document.getElementById('login_user').value.trim() || 'kasutaja_'+(Math.random().toString(36).slice(2,6));
-    await loginUser(username, true);
+  document.getElementById('login_pass').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('login_btn').click(); });
+  document.getElementById('login_new').onclick = ()=>{
+    // show registration modal
+    showRegistration();
   };
 }
-async function loginUser(username, create=false){
-  const users = await sGet('users', false) || [];
-  if(!users.includes(username)){
-    if(!create){ document.getElementById('login_error').textContent = 'Kasutajat ei leitud'; return; }
+
+function showRegistration(){
+  const el = document.createElement('div');
+  el.className='modal-bg'; el.id='regModal';
+  el.innerHTML = `
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 style="font-size:20px;">Loo uus kasutaja</h2>
+    <div class="field">
+      <label>Kasutajanimi</label>
+      <input id="reg_user" placeholder="vali kasutajanimi" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Parool</label>
+      <input id="reg_pass" type="password" placeholder="min 4 tähemärki" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label>Korda parooli</label>
+      <input id="reg_pass2" type="password" placeholder="korda parooli" autocomplete="new-password">
+    </div>
+    <div id="reg_error" class="tiny" style="color:var(--danger);margin-bottom:8px;text-align:center;"></div>
+    <div class="row" style="gap:10px;">
+      <button class="btn btn-ghost" onclick="document.getElementById('regModal').remove()">Loobu</button>
+      <button class="btn btn-primary" id="reg_submit">Registreeri</button>
+    </div>
+  </div>`;
+  document.body.appendChild(el);
+  document.getElementById('reg_submit').onclick = async ()=>{
+    const username = document.getElementById('reg_user').value.trim();
+    const pass = document.getElementById('reg_pass').value;
+    const pass2 = document.getElementById('reg_pass2').value;
+    if(!username || username.length<2){ document.getElementById('reg_error').textContent='Kasutajanimi peab olema vähemalt 2 tähemärki'; return; }
+    if(username === ADMIN_USER){ document.getElementById('reg_error').textContent='See kasutajanimi on reserveeritud'; return; }
+    if(pass.length<4){ document.getElementById('reg_error').textContent='Parool peab olema vähemalt 4 tähemärki'; return; }
+    if(pass !== pass2){ document.getElementById('reg_error').textContent='Paroolid ei kattu'; return; }
+    const users = await sGet('users', false) || [];
+    if(users.includes(username)){ document.getElementById('reg_error').textContent='Kasutajanimi on juba võetud'; return; }
+    const hash = await hashPassword(pass);
+    await sSet('pwhash:'+username, hash, false);
     users.push(username);
     await sSet('users', users, false);
-    // create empty profile later
-  }
+    el.remove();
+    toast('Kasutaja loodud! Palun logi sisse.');
+    // auto-login
+    await loginUser(username, false);
+  };
+}
+
+async function loginUser(username, create=false){
   CURRENT_USER = username;
-  window.localStorage.setItem('lastForestUser', username);
-  // load data
+  window.localStorage.setItem('forestUser', username);
+  if(username === ADMIN_USER){
+    // admin has no profile, but we set it as logged in
+    PROFILE = null;
+    LANKS = [];
+    WORKDAYS = [];
+    ACTIVE_TAB = 'admin';
+    render();
+    return;
+  }
   PROFILE = await sGet('profile:'+username, false);
   LANKS = (await sGet('lanks:'+username, false)) || [];
   WORKDAYS = (await sGet('workdays:'+username, false)) || [];
   await migrateIfNeeded();
-  // if no profile, show onboarding
+  if(!PROFILE){
+    // need onboarding
+    ACTIVE_TAB = 'home';
+    render();
+    return;
+  }
+  ACTIVE_TAB = 'home';
   render();
 }
+
 async function logoutUser(){
   CURRENT_USER = null;
   PROFILE = null;
@@ -373,11 +478,11 @@ async function logoutUser(){
   WORKDAYS = [];
   ACTIVE_DAY_ID = null;
   ACTIVE_LANK_ID = null;
-  window.localStorage.removeItem('lastForestUser');
+  window.localStorage.removeItem('forestUser');
   render();
 }
 
-/* ---------------- Onboarding ---------------- */
+/* ---------------- Onboarding (for new users) ---------------- */
 function onboardingHTML(){
   return `
   <div class="topbar"><div><div class="eyebrow">Tere tulemast, ${CURRENT_USER}</div><div class="pagetitle">ForestTrack AI</div></div></div>
@@ -408,7 +513,15 @@ function onboardingHTML(){
         ${getSortiments().map(s => `<span class="chip">${s.name} (${fmt(s.coefficient,2)})</span>`).join('')}
         <button type="button" class="chip addchip" id="ob_add_sort">+ Lisa</button>
       </div>
-      <div class="tiny">Koefitsient korrutatakse sisestatud kogusega → tihumeetrid</div>
+      <div class="tiny">Koefitsient × sisestatud kogus → tihumeetrid</div>
+    </div>
+    <div class="field">
+      <label>Puuliigid (harvesteri töö jaoks)</label>
+      <div class="chip-row" id="ob_species_list">
+        ${getTreeSpecies().map(s => `<span class="chip">${s}</span>`).join('')}
+        <button type="button" class="chip addchip" id="ob_add_species">+ Lisa</button>
+      </div>
+      <div class="tiny">Mida kasutada harvesteri kirjetes.</div>
     </div>
     <button class="btn btn-primary" id="ob_submit" style="margin-top:6px;">Loo profiil</button>
   </div>`;
@@ -446,6 +559,16 @@ function attachOnboarding(){
     saveProfile();
     render();
   };
+  document.getElementById('ob_add_species').onclick = ()=>{
+    const name = prompt('Uus puuliik:');
+    if(!name) return;
+    const list = getTreeSpecies();
+    if(list.includes(name)){ toast('Juba olemas'); return; }
+    if(!PROFILE.treeSpecies) PROFILE.treeSpecies = TREE_SPECIES_DEFAULT.slice();
+    PROFILE.treeSpecies.push(name);
+    saveProfile();
+    render();
+  };
 
   document.getElementById('ob_submit').onclick = async ()=>{
     const firstName = document.getElementById('ob_first').value.trim();
@@ -460,7 +583,8 @@ function attachOnboarding(){
       role,
       manufacturer: manuSel.value, model: modelSel.value, year: document.getElementById('ob_year').value || '',
       compartment: null,
-      sortiments: getSortiments(), // already from default
+      sortiments: getSortiments(),
+      treeSpecies: getTreeSpecies(),
     };
     await saveProfile();
     await persistAll();
@@ -847,7 +971,10 @@ function entriesListHTML(day, isHarv){
   if(items.length===0) return `<div class="empty">Ühtegi kirjet pole veel lisatud</div>`;
   return [...items].reverse().map(e=>`
     <div class="entry-row">
-      <div><b style="font-size:14px;">${e.sortiment}</b><div class="tiny">${new Date(e.time).toLocaleTimeString('et-EE',{hour:'2-digit',minute:'2-digit'})}${e.destination? ' &middot; '+e.destination:''}</div></div>
+      <div><b style="font-size:14px;">${e.sortiment}</b>
+        ${e.species? `<span class="tiny"> (${e.species}${e.diameter? ', '+e.diameter+'cm':''})</span>` : ''}
+        <div class="tiny">${new Date(e.time).toLocaleTimeString('et-EE',{hour:'2-digit',minute:'2-digit'})}${e.destination? ' &middot; '+e.destination:''}</div>
+      </div>
       <div style="color:var(--amber-hi); font-weight:700;">${fmt(e.volume)} tm</div>
     </div>`).join('');
 }
@@ -860,14 +987,26 @@ function sortimentChipsHTML(containerId, currentDefault){
   </div>`;
 }
 
+function speciesChipsHTML(containerId, currentDefault){
+  const species = getTreeSpecies();
+  return `<div class="chip-row" id="${containerId}">
+    ${species.map((s,i)=>`<button type="button" class="chip ${s===currentDefault?'active':''}" data-sp="${s}">${s}</button>`).join('')}
+    <button type="button" class="chip addchip" id="${containerId}_add">+ Lisa</button>
+  </div>`;
+}
+
 function harvesterPanel(day){
   return `
   <div class="card">
     <h3 style="font-size:16px;">Lisa lõigatud maht</h3>
-    <p class="tiny">Sisesta kogus (nt m³) ja vali sortiment – tulemus salvestatakse tihumeetrites.</p>
+    <p class="tiny">Sisesta kogus (nt m³), vali sortiment ja puuliik – tulemus salvestatakse tihumeetrites.</p>
     <div class="field" style="margin-top:10px;"><label>Sortiment</label>
       ${sortimentChipsHTML('h_sort', getSortimentNames()[0])}
     </div>
+    <div class="field"><label>Puuliik</label>
+      ${speciesChipsHTML('h_species', getTreeSpecies()[0]||'Mänd')}
+    </div>
+    <div class="field"><label>Diameeter (cm, valikuline)</label><input id="h_diam" type="number" placeholder="nt 25"></div>
     <div class="numpad-display" id="h_display">0.0</div>
     <div class="numpad" id="h_numpad">
       ${['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(k=>`<button type="button" class="numkey" data-k="${k}">${k}</button>`).join('')}
@@ -924,6 +1063,7 @@ function attachActiveDay(){
   if(day.role==='Harvesterijuht'){
     setupNumpad('h', day, false);
     attachAddSortiment('h_sort_add');
+    attachAddSpecies('h_species_add');
   } else if(PROFILE.compartment){
     setupNumpad('f', day, true);
     attachAddSortiment('f_sort_add');
@@ -945,9 +1085,23 @@ function attachAddSortiment(btnId){
     render();
   });
 }
+function attachAddSpecies(btnId){
+  document.getElementById(btnId)?.addEventListener('click', async ()=>{
+    const name = prompt('Uus puuliik:');
+    if(!name) return;
+    const list = getTreeSpecies();
+    if(list.includes(name)){ toast('Juba olemas'); return; }
+    if(!PROFILE.treeSpecies) PROFILE.treeSpecies = TREE_SPECIES_DEFAULT.slice();
+    PROFILE.treeSpecies.push(name);
+    await saveProfile();
+    toast('Puuliik lisatud');
+    render();
+  });
+}
 function setupNumpad(prefix, day, isForvarder){
   let val = '0';
   let sort = getSortimentNames()[0];
+  let species = getTreeSpecies()[0] || 'Mänd';
   const display = document.getElementById(prefix+'_display');
   const coefInfo = document.getElementById(prefix+'_coef_info');
 
@@ -962,6 +1116,14 @@ function setupNumpad(prefix, day, isForvarder){
       updateCoefInfo();
     };
   });
+  if(prefix==='h'){
+    document.getElementById('h_species').querySelectorAll('.chip:not(.addchip)').forEach(c=>{
+      c.onclick = ()=>{
+        document.querySelectorAll('#h_species .chip').forEach(x=>x.classList.remove('active')); c.classList.add('active');
+        species = c.dataset.sp;
+      };
+    });
+  }
   updateCoefInfo();
 
   document.getElementById(prefix+'_numpad').querySelectorAll('.numkey').forEach(k=>{
@@ -978,8 +1140,9 @@ function setupNumpad(prefix, day, isForvarder){
     if(!raw || raw<=0){ toast('Sisesta kogus'); return; }
     const coef = getCoefficient(sort);
     const tm = raw * coef;
+    const diam = document.getElementById('h_diam')?.value ? parseFloat(document.getElementById('h_diam').value) : null;
     if(!isForvarder){
-      day.entries.push({id:uid(), volume:tm, sortiment:sort, time:new Date().toISOString()});
+      day.entries.push({id:uid(), volume:tm, sortiment:sort, species:species, diameter:diam, time:new Date().toISOString()});
     } else {
       const dest = document.getElementById('f_dest').value.trim();
       const comment = document.getElementById('f_comment').value.trim();
@@ -1209,6 +1372,7 @@ function renderLeaderboard(){
 function profileHTML(){
   const s = computeStats();
   const sortList = getSortiments();
+  const speciesList = getTreeSpecies();
   return `
   <div class="topbar"><div><div class="eyebrow">Avalik profiil</div><div class="pagetitle">Profiil</div></div></div>
   <div class="card" style="text-align:center;">
@@ -1241,6 +1405,15 @@ function profileHTML(){
   </div>
 
   <div class="card">
+    <h3 style="font-size:16px; margin-bottom:8px;">Puuliigid (harvester)</h3>
+    <div class="divider"></div>
+    <div class="chip-row">
+      ${speciesList.map(s => `<span class="chip">${s}</span>`).join('')}
+      <button type="button" class="chip addchip" id="profileAddSpeciesBtn">+ Lisa</button>
+    </div>
+  </div>
+
+  <div class="card">
     <h3 style="font-size:16px; margin-bottom:8px;">Konto andmed</h3>
     <div class="divider"></div>
     <div class="field"><label>Kasutajanimi</label><input value="@${CURRENT_USER}" disabled></div>
@@ -1265,6 +1438,17 @@ function attachGlobal(){
     PROFILE.sortiments = list;
     await saveProfile();
     toast('Sortiment lisatud');
+    render();
+  });
+  document.getElementById('profileAddSpeciesBtn')?.addEventListener('click', async ()=>{
+    const name = prompt('Uus puuliik:');
+    if(!name) return;
+    const list = getTreeSpecies();
+    if(list.includes(name)){ toast('Juba olemas'); return; }
+    if(!PROFILE.treeSpecies) PROFILE.treeSpecies = TREE_SPECIES_DEFAULT.slice();
+    PROFILE.treeSpecies.push(name);
+    await saveProfile();
+    toast('Puuliik lisatud');
     render();
   });
 
@@ -1313,12 +1497,134 @@ function attachGlobal(){
   });
 }
 
+/* ---------------- Admin Panel ---------------- */
+function adminHTML(){
+  return `
+  <div class="topbar">
+    <div><div class="eyebrow">Administraator</div><div class="pagetitle">Ülevaade</div></div>
+    <button class="btn-ghost btn btn-sm" style="width:auto;" onclick="logoutUser()">🚪</button>
+  </div>
+  <div id="adminContent" class="empty">Laen kasutajaid...</div>
+  `;
+}
+async function attachAdmin(){
+  const container = document.getElementById('adminContent');
+  if(!container) return;
+  const users = await sGet('users', false) || [];
+  // get leaderboard entries for all users
+  const lbKeys = await sListKeys('leaderboard:', true);
+  const lbEntries = [];
+  for(const k of lbKeys){
+    try{ const r = await window.storage.get(k, true); if(r) lbEntries.push(JSON.parse(r.value)); }catch(e){}
+  }
+  // map username to entry
+  const map = {};
+  lbEntries.forEach(e=>{ map[e.username]=e; });
+
+  let html = `<div class="card"><h3>Registreeritud kasutajad (${users.length})</h3><div class="divider"></div>`;
+  if(users.length===0) html += `<div class="empty">Pole ühtegi kasutajat</div>`;
+  else {
+    html += users.map(u=>{
+      const entry = map[u] || {totalVolume:0, doneLanks:0, totalDays:0};
+      return `<div class="entry-row">
+        <div><b>${u}</b> ${entry.name? ' ('+entry.name+')':''}</div>
+        <div class="small">${fmt(entry.totalVolume||0,0)} tm · ${entry.doneLanks||0} lanki</div>
+        <button class="btn-ghost btn btn-sm" onclick="adminViewUser('${u}')">Vaata</button>
+      </div>`;
+    }).join('');
+  }
+  html += `</div>`;
+  // AI add functionality placeholder
+  html += `<div class="card">
+    <h3>AI abil lisamine</h3>
+    <p class="small">Siin saab administraator lisada testandmeid või kasutada AI-d.</p>
+    <button class="btn btn-primary" id="adminAIGen">🤖 Lisa AI testandmed (100 tm)</button>
+  </div>`;
+  container.innerHTML = html;
+
+  document.getElementById('adminAIGen')?.addEventListener('click', async ()=>{
+    // Generate test data for a random user? Or admin? We'll add to current user? But admin has no profile.
+    // We'll instead show a modal to select a user and add a fake entry.
+    const users = await sGet('users', false) || [];
+    if(users.length===0){ toast('Pole kasutajaid'); return; }
+    const selected = prompt('Vali kasutaja (kasutajanimi), kellele lisada testandmed:\n'+users.join(', '));
+    if(!selected || !users.includes(selected)){ toast('Kasutajat ei leitud'); return; }
+    // Add a test workday for that user
+    // We need to load that user's data, add a day, and save.
+    const workdays = await sGet('workdays:'+selected, false) || [];
+    const lanks = await sGet('lanks:'+selected, false) || [];
+    // Create a test lank if none
+    let lank = lanks.find(l=>l.status==='active') || lanks[0];
+    if(!lank){
+      lank = {id: uid(), name:'AI testlank', company:'', forestDistrict:'', location:null, notes:'AI generated', status:'active', createdDate:todayStr(), doneDate:null};
+      lanks.push(lank);
+    }
+    const day = {
+      id: uid(), lankId: lank.id, role:'Harvesterijuht',
+      date: todayStr(), startTime: new Date().toISOString(), endTime: new Date().toISOString(),
+      weather:'☀️ Selge', status:'done', entries:[], loads:[]
+    };
+    // add some entries
+    const sort = 'Kuusepalk';
+    const coef = 1.0; // default
+    const tm = 100; // total
+    day.entries.push({id:uid(), volume:tm, sortiment:sort, species:'Mänd', diameter:30, time:new Date().toISOString()});
+    workdays.push(day);
+    await sSet('workdays:'+selected, workdays, false);
+    await sSet('lanks:'+selected, lanks, false);
+    // update leaderboard for that user by loading profile and computing stats?
+    // We can just update leaderboard by running sync for that user, but we don't have profile. We'll manually update leaderboard entry.
+    // We'll compute total volume from workdays and lanks.
+    const totalVol = workdays.reduce((a,d)=>a+dayVolume(d),0);
+    const doneLanks = lanks.filter(l=>l.status==='done').length;
+    const totalDays = workdays.filter(d=>d.status==='done').length;
+    const entry = await sGet('leaderboard:'+selected, true) || {};
+    entry.totalVolume = totalVol;
+    entry.doneLanks = doneLanks;
+    entry.totalDays = totalDays;
+    entry.updated = Date.now();
+    await sSet('leaderboard:'+selected, entry, true);
+    toast('Lisatud testandmed kasutajale '+selected);
+    attachAdmin(); // refresh
+  });
+}
+
+async function adminViewUser(username){
+  // Load user's workdays and lanks
+  const workdays = await sGet('workdays:'+username, false) || [];
+  const lanks = await sGet('lanks:'+username, false) || [];
+  const totalVol = workdays.reduce((a,d)=>a+dayVolume(d),0);
+  const modal = document.createElement('div');
+  modal.className='modal-bg'; modal.id='adminViewModal';
+  modal.innerHTML = `
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2>${username} andmed</h2>
+    <div class="small">Kokku ${fmt(totalVol)} tm, ${workdays.length} tööpäeva, ${lanks.length} lanki</div>
+    <div class="divider"></div>
+    <div style="max-height:300px;overflow-y:auto;">
+      ${workdays.slice(-10).reverse().map(d=>`
+        <div class="entry-row">
+          <div><b>${d.date}</b> ${d.role==='Harvesterijuht'?'🌲':'🚛'}</div>
+          <div>${fmt(dayVolume(d))} tm</div>
+        </div>
+      `).join('')}
+      ${workdays.length===0? '<div class="empty">Pole tööpäevi</div>':''}
+    </div>
+    <button class="btn btn-ghost" onclick="document.getElementById('adminViewModal').remove()">Sulge</button>
+  </div>`;
+  document.body.appendChild(modal);
+}
+
 /* ---------------- Migration ---------------- */
 async function migrateIfNeeded(){
   let changed = false;
-  // migrate sortiments
   if(PROFILE && PROFILE.sortiments && Array.isArray(PROFILE.sortiments) && typeof PROFILE.sortiments[0] === 'string'){
     PROFILE.sortiments = PROFILE.sortiments.map(name => ({name, coefficient:1.0}));
+    changed = true;
+  }
+  if(PROFILE && !PROFILE.treeSpecies){
+    PROFILE.treeSpecies = TREE_SPECIES_DEFAULT.slice();
     changed = true;
   }
   for(const d of WORKDAYS){
@@ -1333,19 +1639,23 @@ async function migrateIfNeeded(){
     }
   }
   if(PROFILE && !PROFILE.sortiments){ PROFILE.sortiments = SORTIMENTS_DEFAULT.slice(); changed = true; }
+  if(PROFILE && !PROFILE.treeSpecies){ PROFILE.treeSpecies = TREE_SPECIES_DEFAULT.slice(); changed = true; }
   if(changed){ await persistAll(); if(PROFILE) await saveProfile(); }
 }
 
 /* ---------------- Init ---------------- */
 async function init(){
   document.getElementById('screen').innerHTML = `<div class="empty" style="padding-top:80px;"><div class="ico">🌲</div>Laen ForestTrack AI...</div>`;
-  // check last user
-  const last = window.localStorage.getItem('lastForestUser');
-  if(last){
+  // check stored user
+  const stored = window.localStorage.getItem('forestUser');
+  if(stored){
+    // verify user exists
     const users = await sGet('users', false) || [];
-    if(users.includes(last)){
-      await loginUser(last);
+    if(users.includes(stored) || stored === ADMIN_USER){
+      await loginUser(stored, false);
       return;
+    } else {
+      window.localStorage.removeItem('forestUser');
     }
   }
   render();
