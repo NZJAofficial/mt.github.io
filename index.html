@@ -214,6 +214,8 @@ const defaultAssortments = [
   {id:"okaspuu",species:"Lehtpuu",name:"Okaspuuküttepuut",diameter:"3+",cut:"3,0 (2,7–3,3)",length:3,coeff:1,prohibited:"-"}
 ];
 
+function cloneDefaults(){ return JSON.parse(JSON.stringify(defaultAssortments)); }
+
 let state = loadState();
 let selectedAssortment = null;
 let selectedFraction = 1;
@@ -221,9 +223,9 @@ let selectedFraction = 1;
 function loadState(){
   try{
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    if(saved) return {...saved, assortments:saved.assortments?.length?saved.assortments:structuredClone(defaultAssortments)};
+    if(saved) return {...saved, assortments:saved.assortments?.length?saved.assortments:cloneDefaults()};
   }catch(e){}
-  return {user:"", area:4, assortments:structuredClone(defaultAssortments), logs:[]};
+  return {user:"", area:4, assortments:cloneDefaults(), logs:[]};
 }
 function persist(){localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}
 
@@ -352,4 +354,54 @@ function renderSettings(){
     </div>
   `).join("");
   document.querySelectorAll("#settingsList input").forEach(inp=>{
-    
+    inp.addEventListener("change",()=>{
+      const i=Number(inp.dataset.i), field=inp.dataset.field;
+      state.assortments[i][field]=Number(inp.value)||0;
+      persist();renderAssortments();updateStats();
+    });
+  });
+}
+function saveArea(){
+  state.area=Math.max(.01,Number(document.getElementById("areaInput").value)||4);
+  persist();renderAll();
+}
+function addAssortment(){
+  const species=document.getElementById("newSpecies").value.trim();
+  const name=document.getElementById("newName").value.trim();
+  const length=Number(document.getElementById("newLength").value);
+  const coeff=Number(document.getElementById("newCoeff").value);
+  if(!species||!name||!length||coeff<0){alert("Täida puuliik, sortiment, pikkus ja koefitsient.");return}
+  state.assortments.push({id:"custom-"+Date.now(),species,name,length,coeff,diameter:"-",cut:"-",prohibited:"-",custom:true});
+  persist();
+  document.getElementById("newSpecies").value="";document.getElementById("newName").value="";
+  renderAll();
+}
+function deleteAssortment(id){
+  if(!confirm("Kas kustutan selle sortimendi?"))return;
+  state.assortments=state.assortments.filter(a=>a.id!==id);persist();renderAll();
+}
+function resetDefaults(){
+  if(!confirm("Taastada sortimendid ja nende koefitsiendid vaikimisi?"))return;
+  state.assortments=cloneDefaults();persist();renderAll();
+}
+function openQuickSettings(){showPage("settings");window.scrollTo({top:0,behavior:"smooth"})}
+function clearToday(){
+  if(!confirm("Kustutan kõik tänased koormad?"))return;
+  const keep=state.logs.filter(l=>{const x=new Date(l.date),d=new Date();return !(x.getFullYear()===d.getFullYear()&&x.getMonth()===d.getMonth()&&x.getDate()===d.getDate())});
+  state.logs=keep;persist();renderAll();
+}
+function exportCSV(){
+  const logs=todayLogs();
+  if(!logs.length){alert("Täna pole midagi eksportida.");return}
+  const rows=[["Kuupäev","Aeg","Puuliik","Sortiment","Kogus","Ristlõige m²","Pikkus m","Koefitsient","tm"]];
+  logs.forEach(l=>{const d=new Date(l.date);rows.push([d.toLocaleDateString("et-EE"),d.toLocaleTimeString("et-EE"),l.species,l.name,Math.round(l.fraction*4)+"/4",l.area.toFixed(2),l.length,l.coeff,l.tm.toFixed(2)])});
+  const csv="\uFEFF"+rows.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(";")).join("\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="sortimendi-logi-"+new Date().toISOString().slice(0,10)+".csv";a.click();URL.revokeObjectURL(a.href);
+}
+function num(v,d=2){return Number(v).toFixed(d)}
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+init();
+</script>
+</body>
+</html>
