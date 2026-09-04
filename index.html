@@ -2,741 +2,354 @@
 <html lang="et">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
-<title>Metsavedu</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sortimendi Koorma Arvutaja</title>
 <style>
-  :root{
-    --bg:#14201a;
-    --panel:#1c2a22;
-    --panel2:#24352b;
-    --line:#37493d;
-    --text:#eeead9;
-    --text-dim:#9bae9e;
-    --accent:#d19a3a;
-    --accent-dark:#8a6423;
-    --moss:#7fa36b;
-    --danger:#c1543a;
-    --font-display:'Barlow Condensed',sans-serif;
-    --font-body:'Rubik',sans-serif;
-    --font-mono:'JetBrains Mono',monospace;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font-body);-webkit-tap-highlight-color:transparent;}
-  body{padding-bottom:76px;min-height:100vh;}
-  h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;letter-spacing:.02em;}
-  input,select,button,textarea{font-family:inherit;}
-  ::selection{background:var(--accent);color:#1c150a;}
-
-  header{
-    padding:16px 16px 10px;
-    display:flex;align-items:center;justify-content:space-between;
-    border-bottom:1px solid var(--line);
-    background:linear-gradient(180deg,#1a2a20,#14201a);
-    position:sticky;top:0;z-index:5;
-  }
-  header .logo{display:flex;align-items:center;gap:9px;}
-  header .logo svg{width:26px;height:26px;flex:none;}
-  header h1{font-size:22px;text-transform:uppercase;color:var(--text);}
-  header h1 span{color:var(--accent);}
-  header .masin-tag{
-    font-family:var(--font-mono);font-size:12px;color:var(--text-dim);
-    background:var(--panel2);border:1px solid var(--line);border-radius:6px;
-    padding:5px 9px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  }
-
-  main{padding:14px 14px 4px;max-width:520px;margin:0 auto;}
-
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px;}
-  .card h2{font-size:15px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;letter-spacing:.06em;}
-
-  .dash{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
-  .dash .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden;}
-  .dash .stat::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);}
-  .dash .stat .lbl{font-size:11px;text-transform:uppercase;color:var(--text-dim);letter-spacing:.08em;}
-  .dash .stat .val{font-family:var(--font-mono);font-size:26px;font-weight:700;color:var(--text);margin-top:2px;}
-  .dash .stat .val small{font-size:13px;color:var(--text-dim);font-weight:400;}
-
-  .row{display:flex;gap:8px;}
-  select, .input{
-    width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);
-    border-radius:8px;padding:10px 11px;font-size:15px;
-  }
-  select:focus,.input:focus{outline:none;border-color:var(--accent);}
-  label{display:block;font-size:11px;text-transform:uppercase;color:var(--text-dim);letter-spacing:.06em;margin-bottom:5px;}
-  .field{margin-bottom:10px;}
-
-  #quickInput{
-    width:100%;background:var(--panel2);border:2px solid var(--line);color:var(--text);
-    border-radius:10px;padding:14px;font-family:var(--font-mono);font-size:19px;text-transform:uppercase;
-    letter-spacing:.02em;
-  }
-  #quickInput:focus{outline:none;border-color:var(--accent);}
-  #quickInput::placeholder{color:var(--text-dim);text-transform:none;font-size:15px;}
-
-  .chipgroup{margin-top:12px;}
-  .chipgroup .glabel{font-size:11px;text-transform:uppercase;color:var(--text-dim);letter-spacing:.06em;margin-bottom:6px;}
-  .chips{display:flex;flex-wrap:wrap;gap:7px;}
-  .chip{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:20px;padding:8px 13px;font-size:13.5px;cursor:pointer;user-select:none;}
-  .chip:active{background:var(--accent-dark);border-color:var(--accent);}
-  .chip.active{background:var(--accent);color:#20160a;border-color:var(--accent);font-weight:500;}
-
-  .preview{margin-top:12px;padding:12px;border-radius:8px;background:var(--panel2);border:1px dashed var(--line);display:flex;justify-content:space-between;align-items:center;min-height:52px;}
-  .preview .ptxt{font-size:13px;color:var(--text-dim);}
-  .preview .ptxt b{color:var(--text);font-weight:500;}
-  .preview .pval{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--accent);}
-  .preview .pval small{font-size:12px;color:var(--text-dim);font-weight:400;}
-
-  .btn{width:100%;padding:14px;border-radius:10px;border:none;font-family:var(--font-display);font-size:19px;text-transform:uppercase;letter-spacing:.04em;font-weight:600;cursor:pointer;margin-top:12px;}
-  .btn-primary{background:var(--accent);color:#20160a;}
-  .btn-primary:active{background:var(--accent-dark);}
-  .btn-primary:disabled{background:var(--line);color:var(--text-dim);}
-  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text-dim);}
-  .btn-danger{background:var(--danger);color:#fff;}
-  .btn-sm{width:auto;padding:8px 14px;font-size:13px;margin-top:0;border-radius:7px;}
-
-  .err{color:var(--danger);font-size:13px;margin-top:8px;display:none;}
-  .err.show{display:block;}
-
-  .load-row{display:flex;justify-content:space-between;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line);}
-  .load-row:last-child{border-bottom:none;}
-  .load-row .li{display:flex;flex-direction:column;}
-  .load-row .lsort{font-size:14.5px;font-weight:500;}
-  .load-row .lmeta{font-size:11.5px;color:var(--text-dim);font-family:var(--font-mono);margin-top:2px;}
-  .load-row .lval{font-family:var(--font-mono);font-size:16px;color:var(--accent);font-weight:700;white-space:nowrap;}
-  .load-row .ldel{background:none;border:none;color:var(--text-dim);font-size:16px;padding:4px 0 4px 10px;cursor:pointer;}
-
-  .empty{color:var(--text-dim);font-size:13.5px;padding:14px 4px;text-align:center;}
-
-  .sort-summary{display:flex;flex-direction:column;gap:6px;margin-top:2px;}
-  .sort-summary .srow{display:flex;justify-content:space-between;font-size:13.5px;padding:6px 0;border-bottom:1px solid var(--line);}
-  .sort-summary .srow:last-child{border-bottom:none;}
-  .sort-summary .srow .sname{color:var(--text-dim);}
-  .sort-summary .srow .sval{font-family:var(--font-mono);color:var(--text);}
-
-  .set-row{display:grid;grid-template-columns:1fr 78px 34px;gap:7px;align-items:center;margin-bottom:8px;}
-  .set-row.species{grid-template-columns:1fr 34px;}
-  .set-row input{background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:7px;padding:9px;font-size:14px;}
-  .set-row .rm{background:none;border:none;color:var(--text-dim);font-size:18px;cursor:pointer;}
-  .add-row{display:flex;gap:8px;margin-top:6px;}
-  .add-row input{flex:1;}
-
-  .lang-select{margin-bottom:10px;}
-
-  nav{position:fixed;bottom:0;left:0;right:0;z-index:10;background:#101a14;border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));}
-  nav button{flex:1;background:none;border:none;color:var(--text-dim);padding:9px 4px;border-radius:9px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-family:var(--font-body);}
-  nav button.active{color:var(--accent);background:var(--panel2);}
-  nav button svg{width:21px;height:21px;}
-
-  .view{display:none;}
-  .view.active{display:block;}
-
-  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--accent);color:#20160a;font-weight:600;font-family:var(--font-display);padding:10px 20px;border-radius:30px;font-size:15px;letter-spacing:.02em;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:20;}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+:root{
+  --bg:#eef1ed; --card:#fff; --text:#182018; --muted:#6d756d;
+  --green:#245c38; --green2:#347a4d; --line:#dce1dc;
+  --danger:#b23a32; --shadow:0 8px 24px rgba(25,45,30,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{width:min(430px,100%);background:#fff;border-radius:20px;padding:30px;box-shadow:var(--shadow)}
+.logo{width:58px;height:58px;border-radius:16px;background:var(--green);color:#fff;display:grid;place-items:center;font-size:28px;margin-bottom:18px}
+h1,h2,h3{margin-top:0}
+.subtitle{color:var(--muted);line-height:1.5}
+.field{margin:14px 0}
+.field label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}
+input,select{width:100%;padding:13px 14px;border:1px solid #ccd3cc;border-radius:11px;background:#fff;outline:none}
+input:focus,select:focus{border-color:var(--green)}
+.primary{width:100%;border:0;background:var(--green);color:#fff;padding:14px;border-radius:11px;font-weight:700}
+.primary:hover{background:var(--green2)}
+.app{min-height:100vh}
+.topbar{background:var(--green);color:#fff;padding:14px 18px;position:sticky;top:0;z-index:10}
+.topbar-inner{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{font-weight:800;font-size:19px}
+.userbox{display:flex;align-items:center;gap:9px;font-size:13px}
+.icon-btn{border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;border-radius:9px;padding:8px 10px}
+.nav{max-width:1100px;margin:14px auto 0;padding:0 18px;display:flex;gap:8px;overflow:auto}
+.nav button{white-space:nowrap;border:0;background:#fff;color:#445047;border-radius:10px;padding:10px 14px;font-weight:700}
+.nav button.active{background:var(--green);color:#fff}
+main{max-width:1100px;margin:0 auto;padding:18px}
+.page{display:none}
+.page.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:17px;box-shadow:0 3px 12px rgba(20,40,25,.04)}
+.assort-card{transition:.15s;border:1px solid var(--line);text-align:left;width:100%;color:var(--text);background:#fff}
+.assort-card:hover{transform:translateY(-2px);border-color:#9db3a2;box-shadow:var(--shadow)}
+.assort-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.badge{font-size:11px;padding:5px 8px;border-radius:999px;background:#edf4ee;color:var(--green);font-weight:800}
+.species{color:var(--green);font-size:13px;font-weight:800;margin-bottom:7px}
+.assort-name{font-size:17px;font-weight:800;margin-bottom:10px}
+.meta{font-size:12px;color:var(--muted);line-height:1.55}
+.action{margin-top:13px;background:#f2f6f2;color:var(--green);font-weight:800;padding:10px;border-radius:9px;text-align:center}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.stat{background:#fff;border-radius:14px;padding:15px;border:1px solid var(--line)}
+.stat small{color:var(--muted);display:block}.stat strong{display:block;font-size:24px;margin-top:5px}
+.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 12px}
+.section-title h2{font-size:20px;margin:0}
+.secondary{border:1px solid #cbd3cb;background:#fff;color:#344238;border-radius:9px;padding:9px 12px;font-weight:700}
+.danger{border:1px solid #e2b8b5;background:#fff;color:var(--danger);border-radius:9px;padding:9px 12px;font-weight:700}
+.empty{padding:35px 15px;text-align:center;color:var(--muted);background:#fff;border-radius:14px;border:1px dashed #cbd4cb}
+.table-wrap{overflow:auto;background:#fff;border-radius:14px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;min-width:650px}
+th,td{padding:12px 13px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}
+th{background:#f5f7f5;color:#475047}
+.total-row{font-weight:800;background:#f5f7f5}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}
+.modal-backdrop.show{display:flex}
+.modal{width:min(520px,100%);background:#fff;border-radius:18px;padding:21px;max-height:90vh;overflow:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:15px}
+.close{border:0;background:#eef1ee;border-radius:8px;padding:7px 10px}
+.fractions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:13px 0}
+.fraction{border:2px solid #d9e0d9;background:#fff;border-radius:11px;padding:12px 5px;font-weight:800;color:#344238}
+.fraction:hover,.fraction.selected{border-color:var(--green);background:#edf5ef;color:var(--green)}
+.calc-box{background:#f3f7f3;border-radius:12px;padding:14px;line-height:1.7;margin:12px 0}
+.setting-row{display:grid;grid-template-columns:1fr 180px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.setting-row:last-child{border-bottom:0}
+.setting-row small{display:block;color:var(--muted);margin-top:3px}
+.list-item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.list-item:last-child{border-bottom:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.note{font-size:12px;color:var(--muted);line-height:1.5}
+@media(max-width:650px){
+  .stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:1/-1}
+  .setting-row{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <svg viewBox="0 0 24 24" fill="none" stroke="#7fa36b" stroke-width="1.6"><path d="M12 2l5 8h-3l4 6h-3l4 6H5l4-6H6l4-6H7z"/></svg>
-    <h1>Metsa<span>vedu</span></h1>
-  </div>
-  <div class="masin-tag" id="masinTag">masin valimata</div>
-</header>
-
-<main>
-
-  <section class="view active" id="view-logi">
-
-    <div class="dash">
-      <div class="stat">
-        <div class="lbl">Koormaid täna</div>
-        <div class="val" id="statCount">0</div>
-      </div>
-      <div class="stat">
-        <div class="lbl">Kokku tm</div>
-        <div class="val" id="statTotal">0.0</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Lang ja masin</h2>
+<section id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="logo">🌲</div>
+    <h1>Sortimendi koorma arvutaja</h1>
+    <p class="subtitle">Logi sisse enda nime või telefoninumbriga. Andmed salvestatakse selles seadmes automaatselt.</p>
+    <form id="loginForm">
       <div class="field">
-        <label>Lang / objekt</label>
-        <input class="input" id="langInput" list="langList" placeholder="nt. Läti tee 4">
-        <datalist id="langList"></datalist>
+        <label>Nimi või telefon</label>
+        <input id="loginInput" required placeholder="Näiteks Markus või 5xxxxxxx">
       </div>
-      <div class="field" style="margin-bottom:0;">
-        <label>Masin</label>
-        <select id="masinSelect"></select>
+      <button class="primary">Sisene</button>
+    </form>
+  </div>
+</section>
+
+<div id="app" class="app hidden">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">🌲 Sortimendi koormad</div>
+      <div class="userbox"><span id="userName"></span><button class="icon-btn" id="logoutBtn">Logi välja</button></div>
+    </div>
+    <nav class="nav">
+      <button data-page="home" class="active">Koormad</button>
+      <button data-page="logs">Päeva logi</button>
+      <button data-page="settings">Seaded</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="home" class="page active">
+      <div class="stats">
+        <div class="stat"><small>Täna kokku</small><strong id="todayTotal">0.00 tm</strong></div>
+        <div class="stat"><small>Koormaid täna</small><strong id="todayLoads">0</strong></div>
+        <div class="stat"><small>Valitud ristlõige</small><strong id="areaStat">4.00 m²</strong></div>
       </div>
-    </div>
 
-    <div class="card">
-      <h2>Uus koorem</h2>
-      <input id="quickInput" class="input" placeholder="nt. KUUSK PALK 6.1" autocomplete="off" autocapitalize="characters">
-
-      <div class="chipgroup">
-        <div class="glabel">Puuliik</div>
-        <div class="chips" id="liigiChips"></div>
+      <div class="section-title">
+        <h2>Vali sortiment</h2>
+        <button class="secondary" onclick="openQuickSettings()">⚙ Koorma seaded</button>
       </div>
-      <div class="chipgroup">
-        <div class="glabel">Sortiment</div>
-        <div class="chips" id="sortChips"></div>
+      <p class="note">Vajuta sortimendi ruudule → vali koormas olev kogus 1/4, 2/4, 3/4 või 4/4. Arvutus: ristlõike pindala × koefitsient × pikkus.</p>
+      <div id="assortments" class="grid"></div>
+    </section>
+
+    <section id="logs" class="page">
+      <div class="section-title">
+        <h2>Päeva logi</h2>
+        <div class="actions"><button class="secondary" onclick="exportCSV()">⬇ CSV</button><button class="danger" onclick="clearToday()">Kustuta tänane</button></div>
+      </div>
+      <div id="logContent"></div>
+    </section>
+
+    <section id="settings" class="page">
+      <div class="section-title"><h2>Seaded</h2></div>
+
+      <div class="card">
+        <h3>Koorma üldseaded</h3>
+        <div class="setting-row">
+          <div><b>Koorma ristlõike pindala</b><small>Kasuta m². Näiteks 4.00 m².</small></div>
+          <input id="areaInput" type="number" min="0.01" step="0.01">
+        </div>
+        <p class="note">Näiteks 4.00 m² korral tähendab 1/4 = 1.00 m², 2/4 = 2.00 m², 3/4 = 3.00 m² ja 4/4 = 4.00 m².</p>
       </div>
 
-      <div class="preview" id="preview">
-        <div class="ptxt">Vali puuliik ja sortiment</div>
+      <div class="section-title"><h2>Sortimentide koefitsiendid ja pikkused</h2><button class="secondary" onclick="resetDefaults()">Taasta vaikimisi</button></div>
+      <div class="card" id="settingsList"></div>
+      <div class="card" style="margin-top:14px">
+        <h3>Lisa enda sortiment</h3>
+        <div class="grid">
+          <div class="field"><label>Puuliik</label><input id="newSpecies" placeholder="Näiteks Kask"></div>
+          <div class="field"><label>Sortiment</label><input id="newName" placeholder="Näiteks Kasepaberipuit"></div>
+          <div class="field"><label>Pikkus (m)</label><input id="newLength" type="number" step="0.1" min="0.1" value="3"></div>
+          <div class="field"><label>Koefitsient</label><input id="newCoeff" type="number" step="0.001" min="0" value="1"></div>
+        </div>
+        <button class="primary" onclick="addAssortment()">+ Lisa sortiment</button>
       </div>
-      <div class="err" id="quickErr">Kontrolli puuliiki, sortimenti ja pikkust.</div>
-      <button class="btn btn-primary" id="addLoadBtn" disabled>Lisa koorem</button>
-    </div>
+    </section>
+  </main>
+</div>
 
-    <div class="card" id="lastLoadCard" style="display:none;">
-      <h2>Eelmine koorem</h2>
-      <div class="load-row" id="lastLoadRow"></div>
-    </div>
-
-  </section>
-
-  <section class="view" id="view-koormad">
-    <div class="card lang-select">
-      <label>Näita langi</label>
-      <select id="langFilter"></select>
-    </div>
-
-    <div class="dash">
-      <div class="stat">
-        <div class="lbl">Koormaid</div>
-        <div class="val" id="sumCount">0</div>
+<div id="modalBackdrop" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="species" id="modalSpecies"></div>
+        <h2 id="modalName"></h2>
+        <div class="meta" id="modalMeta"></div>
       </div>
-      <div class="stat">
-        <div class="lbl">Kokku tm</div>
-        <div class="val" id="sumTotal">0.0</div>
-      </div>
+      <button class="close" onclick="closeModal()">✕</button>
     </div>
-
-    <div class="card">
-      <h2>Sortimentide kaupa</h2>
-      <div class="sort-summary" id="sortSummary"></div>
+    <div class="calc-box">
+      <b>Koorma ristlõige:</b> <span id="modalArea"></span> m²<br>
+      <b>Koefitsient:</b> <span id="modalCoeff"></span><br>
+      <b>Pikkus:</b> <span id="modalLength"></span> m
     </div>
-
-    <div class="card">
-      <h2>Koormate logi</h2>
-      <div id="loadsList"></div>
+    <h3>Kui palju seda sortimenti on koormas?</h3>
+    <div class="fractions">
+      <button class="fraction" data-fraction="0.25">1/4</button>
+      <button class="fraction" data-fraction="0.5">2/4</button>
+      <button class="fraction" data-fraction="0.75">3/4</button>
+      <button class="fraction" data-fraction="1">4/4</button>
     </div>
-  </section>
-
-  <section class="view" id="view-seaded">
-    <div class="card">
-      <h2>Masinad</h2>
-      <div id="masinList"></div>
-      <div class="add-row">
-        <input id="newMasinName" class="input" placeholder="Masina nimi">
-        <input id="newMasinPindala" class="input" placeholder="Sirmi m²" style="max-width:100px;" inputmode="decimal">
-      </div>
-      <button class="btn btn-ghost btn-sm" id="addMasinBtn" style="margin-top:8px;">+ Lisa masin</button>
+    <div class="calc-box">
+      <b>Arvestatav ristlõige:</b> <span id="selectedArea">0.00</span> m²<br>
+      <b>Koorma tihumeetrid:</b> <span id="calculatedTm">0.00</span> tm
     </div>
-
-    <div class="card">
-      <h2>Puuliigid</h2>
-      <div id="liigiList"></div>
-      <div class="add-row">
-        <input id="newLiigiName" class="input" placeholder="nt. KUUSK">
-      </div>
-      <button class="btn btn-ghost btn-sm" id="addLiigiBtn" style="margin-top:8px;">+ Lisa puuliik</button>
-    </div>
-
-    <div class="card">
-      <h2>Sortimendid ja koefitsendid</h2>
-      <p style="font-size:12.5px;color:var(--text-dim);margin:-4px 0 10px;">nt. Palk, Paberipuu, Vineeripakk, Küttepuu, Balk</p>
-      <div id="sortList"></div>
-      <div class="add-row">
-        <input id="newSortName" class="input" placeholder="nt. VINEERIPAKK">
-        <input id="newSortKoef" class="input" placeholder="Koef" style="max-width:80px;" inputmode="decimal">
-      </div>
-      <button class="btn btn-ghost btn-sm" id="addSortBtn" style="margin-top:8px;">+ Lisa sortiment</button>
-    </div>
-
-    <div class="card">
-      <h2>Andmed</h2>
-      <p style="font-size:13px;color:var(--text-dim);margin:0 0 10px;">Kõik koormad kustutatakse jäädavalt.</p>
-      <button class="btn btn-danger btn-sm" id="wipeBtn">Kustuta kõik koormad</button>
-    </div>
-  </section>
-
-</main>
-
-<div class="toast" id="toast"></div>
-
-<nav>
-  <button class="nav-btn active" data-view="logi">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l8 5v10a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1V8z"/></svg>
-    Logi
-  </button>
-  <button class="nav-btn" data-view="koormad">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V6a1 1 0 011-1h4l2 2h8a1 1 0 011 1v11a1 1 0 01-1 1H5a1 1 0 01-1-1z"/></svg>
-    Koormad
-  </button>
-  <button class="nav-btn" data-view="seaded">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 005 15a1.65 1.65 0 00-1.51-1H3.4a2 2 0 010-4H3.5A1.65 1.65 0 005 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 5c.11-.19.36-1 1-1.51V3.4a2 2 0 014 0v.09c.64.5.89 1.32 1 1.51a1.65 1.65 0 001.82.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019 9a1.65 1.65 0 001.51 1H20.6a2 2 0 010 4h-.09A1.65 1.65 0 0019 15z"/></svg>
-    Seaded
-  </button>
-</nav>
+    <button class="primary" id="saveLoadBtn">✓ Salvesta koorem logisse</button>
+  </div>
+</div>
 
 <script>
-(function(){
+const STORAGE_KEY = "sortimendiApp_v1";
 
-  var DEFAULT_LIIGID = ['KUUSK','MÄND','KASK','HAAB','LEPP','SANGLEPP'];
-  var DEFAULT_SORT = [
-    {name:'PALK', koef:0.45},
-    {name:'PABERIPUU', koef:0.42},
-    {name:'VINEERIPAKK', koef:0.44},
-    {name:'BALK', koef:0.42},
-    {name:'KÜTTEPUU', koef:0.40}
-  ];
+const defaultAssortments = [
+  {id:"kask-vineer-1",species:"Kask",name:"Vineeripalk",diameter:"14–40",cut:"2,8; 3,3",length:2.8,coeff:1,prohibited:"oksatühemad, peenemad, ülestöötamislõhed töötlemissilindris"},
+  {id:"kask-vineer-2",species:"Kask",name:"Vineeripalk",diameter:"14–40",cut:"2,8",length:2.8,coeff:1,prohibited:"peenemad, ülestöötamislõhed töötlemissilindris"},
+  {id:"kask-paber",species:"Kask",name:"Kasepaberipuit",diameter:"6–70",cut:"3,0",length:3,coeff:1,prohibited:"-"},
+  {id:"kuusk-palk-big",species:"Kuusk",name:"Kuusepalk",diameter:">40",cut:"6,1",length:6.1,coeff:1,prohibited:"liit- ja järsk kõverus, lahtine mõlu, mädanik, tulioks"},
+  {id:"kuusk-palk",species:"Kuusk",name:"Kuusepalk",diameter:"16–40",cut:"6,1; 5,2; 4,3 (3,7–6,1); 3,4 abimõõt",length:6.1,coeff:1,prohibited:"liit- ja järsk kõverus, mädanik, tulioks (lahtine mõlu kuni 30 cm)"},
+  {id:"kuusk-peen",species:"Kuusk",name:"Kuusepeenpalk",diameter:"9,0–15,9",cut:"3,7; 4,3; 5,5; 6,1",length:3.7,coeff:1,prohibited:"liit- ja järsk kõverus, mädanik"},
+  {id:"kuusk-paber",species:"Kuusk",name:"Kuusepaberipuit",diameter:"6–70",cut:"3,0",length:3,coeff:1,prohibited:"-"},
+  {id:"madal-kuusk",species:"Kuusk",name:"Madalakvaliteediline kuuse- ja männipalk",diameter:"14+",cut:"3,1",length:3.1,coeff:1,prohibited:"-"},
+  {id:"mang-palk",species:"Mänd",name:"Männipalk",diameter:"16–40",cut:"6,1; 5,2; 4,3 (3,7–6,1); 3,4 abimõõt",length:6.1,coeff:1,prohibited:"liit- ja järsk kõverus, mädanik, tulioks (lahtine mõlu kuni 30 cm)"},
+  {id:"mang-peen",species:"Mänd",name:"Männipeenpalk",diameter:"9,0–15,9",cut:"3,7; 4,3",length:3.7,coeff:1,prohibited:"liit- ja järsk kõverus, mädanik"},
+  {id:"mang-paber",species:"Mänd",name:"Männipaberipuit",diameter:"6–70",cut:"3,0",length:3,coeff:1,prohibited:"-"},
+  {id:"lehtpuu",species:"Lehtpuu",name:"Lehtpuuküttepuut",diameter:"3+",cut:"3,0",length:3,coeff:1,prohibited:"-"},
+  {id:"okaspuu",species:"Lehtpuu",name:"Okaspuuküttepuut",diameter:"3+",cut:"3,0 (2,7–3,3)",length:3,coeff:1,prohibited:"-"}
+];
 
-  var state = {
-    masinad: [],
-    puuliigid: [],
-    sortimendid: [],
-    koormad: [],
-    activeMasinId: null,
-    activeLang: '',
-    selLiik: null,
-    selSort: null
+let state = loadState();
+let selectedAssortment = null;
+let selectedFraction = 1;
+
+function loadState(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if(saved) return {...saved, assortments:saved.assortments?.length?saved.assortments:structuredClone(defaultAssortments)};
+  }catch(e){}
+  return {user:"", area:4, assortments:structuredClone(defaultAssortments), logs:[]};
+}
+function persist(){localStorage.setItem(STORAGE_KEY, JSON.stringify(state));}
+
+function init(){
+  if(state.user){
+    showApp();
+  }else{
+    document.getElementById("loginScreen").classList.remove("hidden");
+  }
+  document.getElementById("loginForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    state.user=document.getElementById("loginInput").value.trim();
+    if(!state.user)return;
+    persist(); showApp();
+  });
+  document.getElementById("logoutBtn").onclick=()=>{
+    state.user=""; persist(); location.reload();
   };
-
-  var uid = function(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); };
-
-  function toast(msg){
-    var t=document.getElementById('toast');
-    t.textContent=msg; t.classList.add('show');
-    clearTimeout(toast._h);
-    toast._h=setTimeout(function(){t.classList.remove('show');},1400);
-  }
-
-  function fmt(n,d){ if(isNaN(n)) return '0'; return n.toFixed(d===undefined?2:d); }
-
-  async function loadAll(){
-    try{ var r=await window.storage.get('masinad'); state.masinad = r?JSON.parse(r.value):[]; }catch(e){ state.masinad=[]; }
-    if(!state.masinad.length){ state.masinad=[{id:uid(),name:'Forwarder 1',pindala:2.2}]; await saveMasinad(); }
-
-    try{ var r2=await window.storage.get('puuliigid'); state.puuliigid = r2?JSON.parse(r2.value):[]; }catch(e){ state.puuliigid=[]; }
-    if(!state.puuliigid.length){ state.puuliigid = DEFAULT_LIIGID.map(function(n){return {id:uid(),name:n};}); await savePuuliigid(); }
-
-    try{ var r3=await window.storage.get('sortimendid'); state.sortimendid = r3?JSON.parse(r3.value):[]; }catch(e){ state.sortimendid=[]; }
-    if(!state.sortimendid.length){ state.sortimendid = DEFAULT_SORT.map(function(s){return {id:uid(),name:s.name,koef:s.koef};}); await saveSort(); }
-
-    try{ var r4=await window.storage.get('koormad'); state.koormad = r4?JSON.parse(r4.value):[]; }catch(e){ state.koormad=[]; }
-
-    try{
-      var r5=await window.storage.get('settings');
-      var s=r5?JSON.parse(r5.value):{};
-      state.activeMasinId = s.activeMasinId || state.masinad[0].id;
-      state.activeLang = s.activeLang || '';
-    }catch(e){ state.activeMasinId = state.masinad[0].id; state.activeLang=''; }
-  }
-
-  async function saveMasinad(){ try{ await window.storage.set('masinad', JSON.stringify(state.masinad)); }catch(e){} }
-  async function savePuuliigid(){ try{ await window.storage.set('puuliigid', JSON.stringify(state.puuliigid)); }catch(e){} }
-  async function saveSort(){ try{ await window.storage.set('sortimendid', JSON.stringify(state.sortimendid)); }catch(e){} }
-  async function saveKoormad(){ try{ await window.storage.set('koormad', JSON.stringify(state.koormad)); }catch(e){} }
-  async function saveSettings(){ try{ await window.storage.set('settings', JSON.stringify({activeMasinId:state.activeMasinId, activeLang:state.activeLang})); }catch(e){} }
-
-  document.querySelectorAll('.nav-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
-      document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
-      btn.classList.add('active');
-      document.getElementById('view-'+btn.dataset.view).classList.add('active');
-      if(btn.dataset.view==='koormad') renderKoormadView();
-      if(btn.dataset.view==='seaded') renderSeaded();
-    });
+  document.querySelectorAll(".nav button").forEach(btn=>{
+    btn.onclick=()=>showPage(btn.dataset.page);
   });
-
-  function currentMasin(){ return state.masinad.find(function(m){return m.id===state.activeMasinId;}) || state.masinad[0]; }
-
-  function renderMasinSelect(){
-    var sel=document.getElementById('masinSelect');
-    sel.innerHTML='';
-    state.masinad.forEach(function(m){
-      var o=document.createElement('option');
-      o.value=m.id; o.textContent=m.name+' — '+fmt(m.pindala,2)+' m²';
-      if(m.id===state.activeMasinId) o.selected=true;
-      sel.appendChild(o);
-    });
-    var m=currentMasin();
-    document.getElementById('masinTag').textContent = m ? (m.name+' · '+fmt(m.pindala,2)+' m²') : 'masin valimata';
-  }
-  document.getElementById('masinSelect').addEventListener('change', function(e){
-    state.activeMasinId = e.target.value;
-    saveSettings(); renderMasinSelect(); updatePreview();
+  document.querySelectorAll(".fraction").forEach(btn=>{
+    btn.onclick=()=>selectFraction(Number(btn.dataset.fraction));
   });
-
-  function renderLangList(){
-    var dl=document.getElementById('langList');
-    dl.innerHTML='';
-    var langs = Array.from(new Set(state.koormad.map(function(k){return k.lang;}).filter(Boolean)));
-    langs.forEach(function(l){ var o=document.createElement('option'); o.value=l; dl.appendChild(o); });
-    document.getElementById('langInput').value = state.activeLang;
-  }
-  document.getElementById('langInput').addEventListener('input', function(e){
-    state.activeLang = e.target.value; saveSettings();
+  document.getElementById("areaInput").addEventListener("change",saveArea);
+  document.getElementById("saveLoadBtn").onclick=saveLoad;
+  renderAll();
+}
+function showApp(){
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("app").classList.remove("hidden");
+  document.getElementById("userName").textContent=state.user;
+  renderAll();
+}
+function showPage(page){
+  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===page));
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+  if(page==="logs")renderLogs();
+  if(page==="settings")renderSettings();
+}
+function renderAll(){renderAssortments();renderLogs();renderSettings();updateStats();}
+function renderAssortments(){
+  const el=document.getElementById("assortments");
+  el.innerHTML=state.assortments.map(a=>`
+    <button class="card assort-card" onclick="openAssortment('${a.id}')">
+      <div class="assort-head"><div class="species">${esc(a.species)}</div><span class="badge">${a.length} m</span></div>
+      <div class="assort-name">${esc(a.name)}</div>
+      <div class="meta">Diameeter: <b>${esc(a.diameter)}</b><br>Lõikusmõõt: <b>${esc(a.cut)}</b><br>Koefitsient: <b>${num(a.coeff,3)}</b></div>
+      <div class="action">+ Lisa koorem</div>
+    </button>
+  `).join("");
+}
+function openAssortment(id){
+  selectedAssortment=state.assortments.find(a=>a.id===id);
+  selectedFraction=1;
+  document.getElementById("modalSpecies").textContent=selectedAssortment.species;
+  document.getElementById("modalName").textContent=selectedAssortment.name;
+  document.getElementById("modalMeta").textContent=`Diameeter ${selectedAssortment.diameter} · lõikus ${selectedAssortment.cut}`;
+  document.getElementById("modalArea").textContent=state.area.toFixed(2);
+  document.getElementById("modalCoeff").textContent=num(selectedAssortment.coeff,3);
+  document.getElementById("modalLength").textContent=selectedAssortment.length;
+  document.getElementById("modalBackdrop").classList.add("show");
+  selectFraction(1);
+}
+function closeModal(){document.getElementById("modalBackdrop").classList.remove("show")}
+function selectFraction(f){
+  selectedFraction=f;
+  document.querySelectorAll(".fraction").forEach(b=>b.classList.toggle("selected",Number(b.dataset.fraction)===f));
+  const usedArea=state.area*f;
+  const tm=usedArea*Number(selectedAssortment.coeff)*Number(selectedAssortment.length);
+  document.getElementById("selectedArea").textContent=usedArea.toFixed(2);
+  document.getElementById("calculatedTm").textContent=tm.toFixed(2);
+}
+function saveLoad(){
+  if(!selectedAssortment)return;
+  const usedArea=state.area*selectedFraction;
+  const tm=usedArea*Number(selectedAssortment.coeff)*Number(selectedAssortment.length);
+  state.logs.push({
+    id:Date.now(),date:new Date().toISOString(),species:selectedAssortment.species,
+    name:selectedAssortment.name,length:selectedAssortment.length,coeff:selectedAssortment.coeff,
+    fraction:selectedFraction,area:usedArea,tm:tm
   });
-
-  function renderChips(){
-    var lw=document.getElementById('liigiChips');
-    lw.innerHTML='';
-    state.puuliigid.forEach(function(l){
-      var c=document.createElement('div');
-      c.className='chip'+(state.selLiik===l.name?' active':'');
-      c.textContent=l.name;
-      c.addEventListener('click', function(){
-        state.selLiik = (state.selLiik===l.name) ? null : l.name;
-        renderChips(); syncQuickFromSelection(); updatePreview();
-      });
-      lw.appendChild(c);
-    });
-
-    var sw=document.getElementById('sortChips');
-    sw.innerHTML='';
-    state.sortimendid.forEach(function(s){
-      var c=document.createElement('div');
-      c.className='chip'+(state.selSort===s.name?' active':'');
-      c.textContent=s.name;
-      c.addEventListener('click', function(){
-        state.selSort = (state.selSort===s.name) ? null : s.name;
-        renderChips(); syncQuickFromSelection(); updatePreview();
-      });
-      sw.appendChild(c);
-    });
-  }
-
-  function syncQuickFromSelection(){
-    var inp=document.getElementById('quickInput');
-    var text = inp.value.trim();
-    var numMatch = text.match(/([0-9]+([.,][0-9]+)?)\s*$/);
-    var lenPart = numMatch ? ' '+numMatch[1] : '';
-    var namePart = [state.selLiik, state.selSort].filter(Boolean).join(' ');
-    inp.value = (namePart + lenPart).trim();
-  }
-
-  function parseQuick(text){
-    text = (text||'').trim().toUpperCase();
-    if(!text) return null;
-    var m = text.match(/^(.*?)\s*([0-9]+([.,][0-9]+)?)\s*(M)?$/);
-    var pikkus=null, namePart=text;
-    if(m){ namePart = m[1].trim(); pikkus = parseFloat(m[2].replace(',','.')); }
-
-    var words = namePart.split(/\s+/).filter(Boolean);
-    var liik = null, sort = null;
-
-    if(words.length){
-      liik = state.puuliigid.find(function(l){return l.name===words[0];}) || null;
-    }
-    var restWords = liik ? words.slice(1) : words;
-    var restText = restWords.join(' ');
-    if(restText){
-      sort = state.sortimendid.find(function(s){return s.name===restText;})
-        || state.sortimendid.find(function(s){return s.name.indexOf(restText)===0;})
-        || null;
-    }
-    if(!liik && !sort && words.length===1){
-      sort = state.sortimendid.find(function(s){return s.name===words[0];}) || null;
-    }
-
-    return {liik:liik, sort:sort, pikkus:pikkus, raw:text};
-  }
-
-  function updatePreview(){
-    var text = document.getElementById('quickInput').value;
-    var parsed = parseQuick(text);
-    var prev = document.getElementById('preview');
-    var btn = document.getElementById('addLoadBtn');
-    var err = document.getElementById('quickErr');
-    err.classList.remove('show');
-
-    var m = currentMasin();
-
-    if(!parsed || !text.trim()){
-      prev.innerHTML = '<div class="ptxt">Vali puuliik ja sortiment</div>';
-      btn.disabled = true; return;
-    }
-    if(!parsed.liik){
-      prev.innerHTML = '<div class="ptxt">Puuliiki ei tuvastatud — vali nimekirjast</div>';
-      btn.disabled = true; return;
-    }
-    if(!parsed.sort){
-      prev.innerHTML = '<div class="ptxt">Puuliik: <b>'+parsed.liik.name+'</b> — vali sortiment</div>';
-      btn.disabled = true; return;
-    }
-    if(!parsed.pikkus || parsed.pikkus<=0){
-      prev.innerHTML = '<div class="ptxt"><b>'+parsed.liik.name+' '+parsed.sort.name+'</b> — lisa pikkus (m)</div>';
-      btn.disabled = true; return;
-    }
-    if(!m){
-      prev.innerHTML = '<div class="ptxt">Vali enne masin</div>';
-      btn.disabled = true; return;
-    }
-
-    var tm = m.pindala * parsed.pikkus * parsed.sort.koef;
-    prev.innerHTML = '<div class="ptxt">'+parsed.liik.name+' '+parsed.sort.name+' · '+fmt(parsed.pikkus,1)+' m<br><b>'+m.name+'</b> · koef '+fmt(parsed.sort.koef,2)+'</div>'
-      + '<div class="pval">'+fmt(tm,2)+'<small> tm</small></div>';
-    btn.disabled = false;
-  }
-
-  document.getElementById('quickInput').addEventListener('input', function(){
-    var parsed = parseQuick(document.getElementById('quickInput').value);
-    state.selLiik = parsed && parsed.liik ? parsed.liik.name : state.selLiik;
-    state.selSort = parsed && parsed.sort ? parsed.sort.name : state.selSort;
-    renderChips();
-    updatePreview();
-  });
-
-  document.getElementById('addLoadBtn').addEventListener('click', async function(){
-    var text = document.getElementById('quickInput').value;
-    var parsed = parseQuick(text);
-    var m = currentMasin();
-    if(!parsed || !parsed.liik || !parsed.sort || !parsed.pikkus || parsed.pikkus<=0 || !m){
-      document.getElementById('quickErr').classList.add('show');
-      return;
-    }
-    var tm = m.pindala * parsed.pikkus * parsed.sort.koef;
-    var load = {
-      id: uid(), ts: Date.now(),
-      lang: state.activeLang || 'Määramata',
-      masinId: m.id, masinNimi: m.name,
-      liik: parsed.liik.name, sortiment: parsed.sort.name,
-      pikkus: parsed.pikkus, tm: tm
-    };
-    state.koormad.unshift(load);
-    await saveKoormad();
-    document.getElementById('quickInput').value='';
-    state.selLiik=null; state.selSort=null;
-    renderChips();
-    updatePreview(); renderDash(); renderLastLoad(); renderLangList();
-    toast('Koorem lisatud · '+fmt(tm,2)+' tm');
-  });
-
-  function renderDash(){
-    var todayStart = new Date(); todayStart.setHours(0,0,0,0);
-    var todays = state.koormad.filter(function(k){return k.ts>=todayStart.getTime();});
-    document.getElementById('statCount').textContent = todays.length;
-    document.getElementById('statTotal').innerHTML = fmt(todays.reduce(function(a,k){return a+k.tm;},0),1)+'<small> tm</small>';
-  }
-
-  function renderLastLoad(){
-    var card=document.getElementById('lastLoadCard');
-    if(!state.koormad.length){ card.style.display='none'; return; }
-    card.style.display='block';
-    var k = state.koormad[0];
-    var row=document.getElementById('lastLoadRow');
-    var t = new Date(k.ts);
-    var hh=(''+t.getHours()).padStart(2,'0'), mm=(''+t.getMinutes()).padStart(2,'0');
-    row.innerHTML = '<div class="li"><span class="lsort">'+k.liik+' '+k.sortiment+' · '+fmt(k.pikkus,1)+'m</span>'
-      +'<span class="lmeta">'+hh+':'+mm+' · '+k.lang+' · '+k.masinNimi+'</span></div>'
-      +'<span class="lval">'+fmt(k.tm,2)+' tm</span>';
-  }
-
-  function renderLangFilter(){
-    var sel=document.getElementById('langFilter');
-    var cur = sel.value;
-    var langs = Array.from(new Set(state.koormad.map(function(k){return k.lang;})));
-    sel.innerHTML='<option value="__all__">Kõik langid</option>';
-    langs.forEach(function(l){ var o=document.createElement('option'); o.value=l; o.textContent=l; sel.appendChild(o); });
-    if(cur && (cur==='__all__' || langs.indexOf(cur)>=0)) sel.value=cur;
-  }
-  document.getElementById('langFilter').addEventListener('change', renderKoormadView);
-
-  function renderKoormadView(){
-    renderLangFilter();
-    var filter = document.getElementById('langFilter').value || '__all__';
-    var list = filter==='__all__' ? state.koormad : state.koormad.filter(function(k){return k.lang===filter;});
-
-    document.getElementById('sumCount').textContent = list.length;
-    document.getElementById('sumTotal').innerHTML = fmt(list.reduce(function(a,k){return a+k.tm;},0),1)+'<small> tm</small>';
-
-    var bySort = {};
-    list.forEach(function(k){
-      var key = k.liik+' '+k.sortiment;
-      bySort[key] = bySort[key] || {tm:0,count:0};
-      bySort[key].tm += k.tm;
-      bySort[key].count += 1;
-    });
-    var sortWrap = document.getElementById('sortSummary');
-    var keys = Object.keys(bySort);
-    if(!keys.length){
-      sortWrap.innerHTML = '<div class="empty">Koormaid pole veel</div>';
-    } else {
-      sortWrap.innerHTML = keys.sort().map(function(name){
-        var v=bySort[name];
-        return '<div class="srow"><span class="sname">'+name+' ('+v.count+')</span><span class="sval">'+fmt(v.tm,2)+' tm</span></div>';
-      }).join('');
-    }
-
-    var loadsWrap = document.getElementById('loadsList');
-    if(!list.length){
-      loadsWrap.innerHTML = '<div class="empty">Selle langi kohta pole koormaid</div>';
-    } else {
-      loadsWrap.innerHTML='';
-      list.forEach(function(k){
-        var t=new Date(k.ts);
-        var dd=(''+t.getDate()).padStart(2,'0'), mo=(''+(t.getMonth()+1)).padStart(2,'0');
-        var hh=(''+t.getHours()).padStart(2,'0'), mi=(''+t.getMinutes()).padStart(2,'0');
-        var row=document.createElement('div');
-        row.className='load-row';
-        row.innerHTML = '<div class="li"><span class="lsort">'+k.liik+' '+k.sortiment+' · '+fmt(k.pikkus,1)+'m</span>'
-          +'<span class="lmeta">'+dd+'.'+mo+' '+hh+':'+mi+' · '+k.masinNimi+(filter==='__all__' ? (' · '+k.lang) : '')+'</span></div>'
-          +'<span class="lval">'+fmt(k.tm,2)+'</span>'
-          +'<button class="ldel" data-id="'+k.id+'" aria-label="Kustuta">✕</button>';
-        loadsWrap.appendChild(row);
-      });
-      loadsWrap.querySelectorAll('.ldel').forEach(function(b){
-        b.addEventListener('click', async function(){
-          state.koormad = state.koormad.filter(function(k){return k.id!==b.dataset.id;});
-          await saveKoormad();
-          renderKoormadView(); renderDash(); renderLastLoad();
-        });
-      });
-    }
-  }
-
-  function renderSeaded(){
-    var mw=document.getElementById('masinList');
-    mw.innerHTML='';
-    state.masinad.forEach(function(m){
-      var row=document.createElement('div');
-      row.className='set-row';
-      row.innerHTML = '<input value="'+m.name.replace(/"/g,'&quot;')+'" data-id="'+m.id+'" data-f="name">'
-        +'<input value="'+m.pindala+'" data-id="'+m.id+'" data-f="pindala" inputmode="decimal">'
-        +'<button class="rm" data-id="'+m.id+'">✕</button>';
-      mw.appendChild(row);
-    });
-    mw.querySelectorAll('input').forEach(function(inp){
-      inp.addEventListener('change', async function(){
-        var m = state.masinad.find(function(x){return x.id===inp.dataset.id;});
-        if(!m) return;
-        if(inp.dataset.f==='name') m.name = inp.value.trim() || m.name;
-        else { var v=parseFloat((inp.value||'').replace(',','.')); if(!isNaN(v) && v>0) m.pindala=v; }
-        await saveMasinad(); renderMasinSelect(); updatePreview();
-      });
-    });
-    mw.querySelectorAll('.rm').forEach(function(b){
-      b.addEventListener('click', async function(){
-        if(state.masinad.length<=1){ toast('Vähemalt üks masin peab jääma'); return; }
-        state.masinad = state.masinad.filter(function(x){return x.id!==b.dataset.id;});
-        if(state.activeMasinId===b.dataset.id) state.activeMasinId = state.masinad[0].id;
-        await saveMasinad(); await saveSettings();
-        renderSeaded(); renderMasinSelect(); updatePreview();
-      });
-    });
-
-    var lw=document.getElementById('liigiList');
-    lw.innerHTML='';
-    state.puuliigid.forEach(function(l){
-      var row=document.createElement('div');
-      row.className='set-row species';
-      row.innerHTML = '<input value="'+l.name.replace(/"/g,'&quot;')+'" data-id="'+l.id+'" style="text-transform:uppercase;">'
-        +'<button class="rm" data-id="'+l.id+'">✕</button>';
-      lw.appendChild(row);
-    });
-    lw.querySelectorAll('input').forEach(function(inp){
-      inp.addEventListener('change', async function(){
-        var l = state.puuliigid.find(function(x){return x.id===inp.dataset.id;});
-        if(!l) return;
-        l.name = inp.value.trim().toUpperCase() || l.name;
-        await savePuuliigid(); renderChips(); updatePreview();
-      });
-    });
-    lw.querySelectorAll('.rm').forEach(function(b){
-      b.addEventListener('click', async function(){
-        state.puuliigid = state.puuliigid.filter(function(x){return x.id!==b.dataset.id;});
-        await savePuuliigid(); renderSeaded(); renderChips(); updatePreview();
-      });
-    });
-
-    var sw=document.getElementById('sortList');
-    sw.innerHTML='';
-    state.sortimendid.forEach(function(s){
-      var row=document.createElement('div');
-      row.className='set-row';
-      row.innerHTML = '<input value="'+s.name.replace(/"/g,'&quot;')+'" data-id="'+s.id+'" data-f="name" style="text-transform:uppercase;">'
-        +'<input value="'+s.koef+'" data-id="'+s.id+'" data-f="koef" inputmode="decimal">'
-        +'<button class="rm" data-id="'+s.id+'">✕</button>';
-      sw.appendChild(row);
-    });
-    sw.querySelectorAll('input').forEach(function(inp){
-      inp.addEventListener('change', async function(){
-        var s = state.sortimendid.find(function(x){return x.id===inp.dataset.id;});
-        if(!s) return;
-        if(inp.dataset.f==='name') s.name = inp.value.trim().toUpperCase() || s.name;
-        else { var v=parseFloat((inp.value||'').replace(',','.')); if(!isNaN(v) && v>0) s.koef=v; }
-        await saveSort(); renderChips(); updatePreview();
-      });
-    });
-    sw.querySelectorAll('.rm').forEach(function(b){
-      b.addEventListener('click', async function(){
-        state.sortimendid = state.sortimendid.filter(function(x){return x.id!==b.dataset.id;});
-        await saveSort(); renderSeaded(); renderChips(); updatePreview();
-      });
-    });
-  }
-
-  document.getElementById('addMasinBtn').addEventListener('click', async function(){
-    var nameEl=document.getElementById('newMasinName'), pEl=document.getElementById('newMasinPindala');
-    var name=nameEl.value.trim();
-    var pindala=parseFloat((pEl.value||'').replace(',','.'));
-    if(!name || isNaN(pindala) || pindala<=0){ toast('Sisesta nimi ja sirmi pindala'); return; }
-    state.masinad.push({id:uid(), name:name, pindala:pindala});
-    await saveMasinad();
-    nameEl.value=''; pEl.value='';
-    renderSeaded(); renderMasinSelect();
-  });
-
-  document.getElementById('addLiigiBtn').addEventListener('click', async function(){
-    var nameEl=document.getElementById('newLiigiName');
-    var name=nameEl.value.trim().toUpperCase();
-    if(!name){ toast('Sisesta puuliigi nimi'); return; }
-    state.puuliigid.push({id:uid(), name:name});
-    await savePuuliigid();
-    nameEl.value='';
-    renderSeaded(); renderChips();
-  });
-
-  document.getElementById('addSortBtn').addEventListener('click', async function(){
-    var nameEl=document.getElementById('newSortName'), kEl=document.getElementById('newSortKoef');
-    var name=nameEl.value.trim().toUpperCase();
-    var koef=parseFloat((kEl.value||'').replace(',','.'));
-    if(!name || isNaN(koef) || koef<=0){ toast('Sisesta nimi ja koefitsent'); return; }
-    state.sortimendid.push({id:uid(), name:name, koef:koef});
-    await saveSort();
-    nameEl.value=''; kEl.value='';
-    renderSeaded(); renderChips();
-  });
-
-  document.getElementById('wipeBtn').addEventListener('click', async function(){
-    if(!confirm('Kustutada kõik koormad jäädavalt?')) return;
-    state.koormad = [];
-    await saveKoormad();
-    renderDash(); renderLastLoad(); renderKoormadView();
-    toast('Koormad kustutatud');
-  });
-
-  async function init(){
-    await loadAll();
-    renderMasinSelect();
-    renderLangList();
-    renderChips();
-    updatePreview();
-    renderDash();
-    renderLastLoad();
-  }
-  init();
-
-})();
-</script>
-</body>
-</html>
+  persist(); closeModal(); renderAll();
+}
+function todayLogs(){
+  const d=new Date(); const y=d.getFullYear(),m=d.getMonth(),day=d.getDate();
+  return state.logs.filter(l=>{const x=new Date(l.date);return x.getFullYear()===y&&x.getMonth()===m&&x.getDate()===day});
+}
+function updateStats(){
+  const logs=todayLogs();
+  document.getElementById("todayTotal").textContent=logs.reduce((s,l)=>s+l.tm,0).toFixed(2)+" tm";
+  document.getElementById("todayLoads").textContent=logs.length;
+  document.getElementById("areaStat").textContent=Number(state.area).toFixed(2)+" m²";
+}
+function renderLogs(){
+  const el=document.getElementById("logContent"), logs=todayLogs();
+  if(!logs.length){el.innerHTML='<div class="empty">Täna pole veel koormaid salvestatud.</div>';return}
+  const grouped={};
+  logs.forEach(l=>{const key=l.name; if(!grouped[key])grouped[key]={name:l.name,species:l.species,tm:0,loads:0};grouped[key].tm+=l.tm;grouped[key].loads++});
+  const total=logs.reduce((s,l)=>s+l.tm,0);
+  el.innerHTML=`
+    <div class="card" style="margin-bottom:14px">
+      <b>Tänane kogus: ${total.toFixed(2)} tm</b> · ${logs.length} koormat
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Aeg</th><th>Puuliik</th><th>Sortiment</th><th>Kogus</th><th>Ristlõige</th><th>Pikkus</th><th>Koef.</th><th>tm</th></tr></thead>
+      <tbody>
+      ${logs.slice().reverse().map(l=>`<tr><td>${new Date(l.date).toLocaleTimeString("et-EE",{hour:"2-digit",minute:"2-digit"})}</td><td>${esc(l.species)}</td><td>${esc(l.name)}</td><td>${Math.round(l.fraction*4)}/4</td><td>${l.area.toFixed(2)} m²</td><td>${l.length} m</td><td>${num(l.coeff,3)}</td><td><b>${l.tm.toFixed(2)}</b></td></tr>`).join("")}
+      <tr class="total-row"><td colspan="7">KOKKU</td><td>${total.toFixed(2)} tm</td></tr>
+      </tbody>
+    </table></div>
+    <div class="section-title"><h2>Tänane sortimentide kokkuvõte</h2></div>
+    <div class="grid">${Object.values(grouped).map(g=>`<div class="card"><div class="species">${esc(g.species)}</div><b>${esc(g.name)}</b><div class="meta">${g.loads} koormat</div><h2 style="margin:7px 0 0">${g.tm.toFixed(2)} tm</h2></div>`).join("")}</div>
+  `;
+}
+function renderSettings(){
+  document.getElementById("areaInput").value=state.area;
+  document.getElementById("settingsList").innerHTML=state.assortments.map((a,i)=>`
+    <div class="list-item">
+      <div><b>${esc(a.species)} – ${esc(a.name)}</b><small class="note">Diameeter ${esc(a.diameter)} · ${esc(a.cut)}</small></div>
+      <div class="actions">
+        <label class="note">Pikkus <input data-i="${i}" data-field="length" type="number" min="0.1" step="0.1" value="${a.length}" style="width:85px;padding:8px"></label>
+        <label class="note">Koef. <input data-i="${i}" data-field="coeff" type="number" min="0" step="0.001" value="${a.coeff}" style="width:95px;padding:8px"></label>
+        ${a.custom?`<button class="danger" onclick="deleteAssortment('${a.id}')">Kustuta</button>`:""}
+      </div>
+    </div>
+  `).join("");
+  document.querySelectorAll("#settingsList input").forEach(inp=>{
+    
