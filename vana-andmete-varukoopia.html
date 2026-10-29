@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="et"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vanade andmete varukoopia</title>
+<style>body{font-family:Arial,sans-serif;max-width:560px;margin:30px auto;padding:0 16px;line-height:1.5}button{padding:14px 18px;font-size:16px;border:0;border-radius:10px;background:#245c38;color:#fff;font-weight:700}li{margin:6px 0}</style></head>
+<body>
+<h2>🌲 Vanade andmete varukoopia</h2>
+<p>Pane see fail <b>samale veebiaadressile (samasse kausta), kus su vana rakendus asub</b>, ja ava see seal. Leht ei muuda ega kustuta midagi — ta ainult loeb selle aadressi brauseris olevad andmed ja laadib need alla failina. Selle faili saad uues rakenduses importida (Seaded → Andmed → Taasta varukoopiast).</p>
+<ul id="list"></ul>
+<button id="go">⬇ Lae varukoopia alla</button>
+<p id="msg"></p>
+<script>
+const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(/^(sortimendiApp_|metsapraktika_v1_)/.test(k))keys.push(k)}
+const ul=document.getElementById("list");
+keys.forEach(k=>{let info="";try{const o=JSON.parse(localStorage.getItem(k));if(o&&Array.isArray(o.logs))info=(o.user||"")+": "+o.logs.length+" koormat";else if(o&&(o.works||o.days))info=(o.user||"")+": "+(o.works||o.days).length+" tööd"}catch(e){}ul.insertAdjacentHTML("beforeend","<li><code>"+k+"</code> "+info+"</li>")});
+if(!keys.length)document.getElementById("msg").textContent="Sellel aadressil pole vanu andmeid (või see on teine aadress kui vana rakendusel).";
+document.getElementById("go").onclick=()=>{
+  const dump={app:"legacy-dump",exportedAt:new Date().toISOString(),keys:{}};keys.forEach(k=>dump.keys[k]=localStorage.getItem(k));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(dump)],{type:"application/json"}));a.download="vanad-andmed-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();a.remove();
+  document.getElementById("msg").textContent="Valmis — "+keys.length+" andmestikku salvestatud.";
+};
+</script></body></html>

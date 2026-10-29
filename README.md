@@ -1,27 +1,60 @@
 # Metsapraktika päevik
 
-Failid peavad olema samas kaustas ja **majutatud HTTPS-is** (GitHub Pages, Netlify, Cloudflare Pages — tasuta):
-`index.html`, `manifest.webmanifest`, `sw.js`. Telefonis: ava leht → "Lisa koduekraanile".
-(Ilma majutuseta, lihtsalt faili avades töötab põhiosa, aga offline-tugi ja ntfy-nupud ei tööta.)
+Failid samas kaustas, majutatud **HTTPS-is** (GitHub Pages, Netlify, Cloudflare Pages — tasuta): `index.html`, `manifest.webmanifest`, `sw.js`.
+Uue versiooni üleslaadimine **samale aadressile** ei puuduta andmeid (need on brauseris ja pilves, mitte failis).
+Aadressi vahetamisel / brauseriandmete tühjendamisel kaovad kohalikud andmed → tee varukoopia (Seaded → Andmed) või kasuta pilvesünki.
 
-## Mis rakendus teeb
+## Uus selles versioonis
 
-- **Töö langil**: "Alusta tööd langil" (lank, kvartal, eraldis, masin; algusaeg automaatselt). "Vaheta lanki" lõpetab praeguse ja alustab uue — igal langil on oma tunnid ja koormad.
-- **Koorem**: koormate arv (+/−) ja kas täituvus 1/4–4/4 (arvutab tm) **või** otse tm sisestus. "↻ Sama uuesti" kordab eelmist koormat ühe vajutusega.
-- **Palk**: Seadetes tunnipalk (€/h) ja/või tm-hind (€/tm; sortimendi juures saab panna oma hinna). Kokkuvõttes näidatakse mõlemat hinnangut, peamiseks loetakse valitud.
-- **Kokkuvõte**: täna / nädal / kuu / kõik — tunnid, koormad, tm, tm/h, raha; päevade, langide ja sortimentide kaupa.
-- **RMK nimetused**: Sortimendid → "+ RMK nimetused" lisab RMK ametlikes dokumentides esinevad nimed (Männipalk, Kuusepalk, Kasevineeripakk, Kasespoonipakk, Kasepeenpalk, Haavapalk, Sanglepapalk, Hall-lepapalk, Kuusepaberipuit, Küttepuit, D-kvaliteet). Koefitsient on 1 — kalibreeri ise.
-- **Praktikapäevik**: iga päev (kõik selle päeva langid) saab ühe rea sinu Wordi tabeli lõppu. Tegevuste tekst koostatakse koormatest; "isiklik panus" jääb sinu kirjutada. Eelvaates saab kellaaegu parandada ja koormaid kustutada. Seaded → "Lae praegune praktikapäevik alla" annab hetkeseisu.
-- **"Kas töö veel käib?"**: kui koormaid pole X tundi (Seaded, vaikimisi 2 h), küsib rakendus: "Töö käib" või "Päev läbi" (siis saad panna tegeliku lõppkellaaja). Kell 22:00 (muudetav) lõpeb töö automaatselt.
+- **Andmed jäävad alles**: kohalik salvestus + palve brauserile mitte andmeid kustutada + JSON-varukoopia ja taastamine.
+- **Sama nimi teises seadmes = samad andmed**: pilvesünk (Firebase, tasuta). Liidab, mitte ei kirjuta üle: kahes seadmes lisatud koormad jäävad mõlemad alles, kustutamised kanduvad üle.
+- **Kustutamine**: üksik koorem (✕), töö, terve päev (praktikapäeviku eelvaates) ja "Kustuta kõik tööd ja koormad" (kandub kõigisse seadmetesse). Wordi faili kustutamised ei puuduta.
+- **Nutikas sisestus**: koorma lisamisel kirjuta nt `3 koormat männipalk 45 tm` või `kuusepaberipuit 2 koormat 3/4` → täidab vormi.
+- **💬 Abiline** (all paremal): ilma võtmeta lisab koormaid samast tekstist. Anthropicu API võtmega oskab ka tööd alustada/lõpetada, muuta seadeid ja sortimente, öelda kokkuvõtteid, kustutada koormaid (sinu kinnitusel) ja kirjutada päeviku teksti (isiklikku panust ainult kui palud). Rakenduse koodi see ei muuda — muudatused tehakse rakenduse enda tegevustega.
 
-## Teavitused telefonis (ntfy)
+## Uuendamine ilma andmeid kaotamata
 
-Veebileht ei saa suletuna ise kella jälgida. Seepärast ajastab rakendus teate **ette** tasuta teenusesse ntfy.sh
-(`delay` + `sequence-id`) ja tühistab/ajastab selle uuesti iga koorma lisamisel.
+- Lae uus `index.html` **samale aadressile** nagu vana — andmed jäävad alles (need on brauseris/pilves, mitte failis). Esimesel avamisel salvestab rakendus ka koopia algsest seisust (Seaded → Andmed → "Enne uuendust").
+- Rakendus hoiab lisaks 3 viimast päevakoopiat; need on samas kohas alla laaditavad.
+- **Vana Koorma Arvutaja andmed** (kui kasutasid seda varasemat rakendust samal aadressil): rakendus leiab need ise ja küsib esimesel sisselogimisel, kas importida. Vanu andmeid ei kustutata ega muudeta; korduv import ei tekita topelt. Fotosid uus rakendus ei impordi (need jäävad vana andmestiku sisse alles).
+- Kui uus rakendus on **teisel aadressil**: pane `vana-andmete-varukoopia.html` vana rakenduse kausta, ava see seal, lae fail alla ja impordi uues rakenduses (Seaded → Andmed → Taasta varukoopiast).
 
-1. Installi ntfy rakendus. 2. Seaded → "Loo teema", tellige sama teema ntfy rakenduses. 3. "Saada test".
+## Öövahetus / keskööst üle
 
-Ausalt: seda päris ntfy serveri ja telefoniga pole minu keskkonnas (võrguta) läbi testitud — päringud on kontrollitud
-(saadetavad URL-id ja järjekord), aga tühistamise (DELETE) toimimine brauserist sõltub ntfy CORS-seadistusest.
-Halvimal juhul tuleb üks üleliigne "kas töö käib?" teade; vajutades "Töö käib" läheb kõik korda.
-Ilma ntfy-ta küsib rakendus sama asja kohe, kui oled selle avanud/taustal lahti ja aeg täis.
+- Avaleht näitab **vahetuse päeva** (töö algus), mitte kalendripäeva: töö käies ja 12 h pärast lõppu püsivad tm, koormad ja tunnid ekraanil ka pärast kella 24.
+- Seaded → "Töö lõpeb automaatselt kell": **−1 = ei lõpeta automaatselt** (sobib öövahetusele).
+- Kokkuvõttes puuduta päeva (või avalehel "Ava päev"): näed koormaid, masinat, kellaaegu ja sortimente.
+
+## Pilvesünk (5 min, ühekordne)
+
+1. [console.firebase.google.com](https://console.firebase.google.com) → **Add project** (Analytics võib välja lülitada).
+2. **Build → Authentication → Get started → Sign-in method → Anonymous → Enable.**
+3. **Build → Firestore Database → Create database** (production mode, piirkond nt `eur3`).
+4. Firestore → **Rules** → asenda sisuga ja **Publish**:
+   ```
+   rules_version = '2';
+   service cloud.firestore {
+     match /databases/{database}/documents {
+       match /users/{id} {
+         allow get, create, update: if request.auth != null;
+         allow list, delete: if false;
+       }
+     }
+   }
+   ```
+5. **Project settings (⚙) → General**: kopeeri **Project ID** ja **Web API Key** (kui API key'd ei näe: lisa seal veebirakendus `</>`, see näitab `apiKey`).
+6. Rakenduses: **Seaded → Pilvesünk** → sisesta mõlemad (iga seadme jaoks üks kord) — või kirjuta need `index.html` algusesse konstanti `FIREBASE`.
+
+Turvalisus ausalt: pilvedokumendi nimi on hash(nimi + salasõna). Kes teab nime ja salasõna, pääseb su andmetele; **ilma salasõnata piisab ainult nimest** — pane salasõna. Andmed on Firestore'is krüpteerimata (Firebase projekti omanik näeb neid). Dokumentide loetelu ega kustutamine pole reeglitega lubatud.
+
+## AI võti
+
+Anthropicu konsoolist (console.anthropic.com) oma API võti → Seaded → AI abiline. Võti jääb ainult selle seadme brauserisse (ei sünkroonita), kulu läheb sinu arvele — sea konsoolis kuupiir. Vaikimisi mudel `claude-haiku-5-5` (muudetav väljal "Mudel").
+
+## Testimise staatus
+
+Päris Chromiumis testitud (võltsitud Firebase/ntfy/Anthropic vastustega): kahe seadme liitmine (samaaegsed lisamised, kustutamised, kogu andmete kustutamine), vale salasõna → eraldi andmed, varukoopia, tekstisisestus, AI tööriistakutsed, Wordi eksport. **Päris Firebase'i, ntfy ja Anthropicu serveritega pole testitud** (mu keskkonnal pole internetti) — päringuvormingud järgivad dokumentatsiooni, aga esimesel kasutusel vaata Seaded → Pilvesünk olekut ja "Saada test".
+
+## Teavitused (ntfy)
+
+Eelmisest versioonist: Seaded → Teavitused telefonis → loo teema, telli ntfy rakenduses, "Saada test".
