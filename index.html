@@ -4,22 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#245c38">
+<meta name="color-scheme" content="light dark">
+<script>(function(){try{var m=localStorage.getItem("metsapraktika_theme")||"auto";var d=m==="dark"||(m==="auto"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.setAttribute("data-theme",d?"dark":"light")}catch(e){}})()</script>
 <title>Metsapraktika päevik</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-:root{--bg:#eef1ed;--card:#fff;--text:#182018;--muted:#6d756d;--green:#245c38;--green2:#347a4d;--line:#dce1dc;--danger:#b23a32;--blue:#315f91;--shadow:0 8px 24px rgba(25,45,30,.08)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}.hidden{display:none!important}
-.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}.login-card{width:min(430px,100%);background:#fff;border-radius:20px;padding:30px;box-shadow:var(--shadow)}.logo{width:58px;height:58px;border-radius:16px;background:var(--green);color:#fff;display:grid;place-items:center;font-size:28px;margin-bottom:18px}h1,h2,h3{margin-top:0}.subtitle{color:var(--muted);line-height:1.5}.field{margin:14px 0}.field label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}input,select,textarea{width:100%;padding:13px 14px;border:1px solid #ccd3cc;border-radius:11px;background:#fff;outline:none}textarea{min-height:90px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:var(--green)}.primary{width:100%;border:0;background:var(--green);color:#fff;padding:14px;border-radius:11px;font-weight:700}.primary:hover{background:var(--green2)}
-.app{min-height:100vh}.topbar{background:var(--green);color:#fff;padding:14px 18px;position:sticky;top:0;z-index:10}.topbar-inner{max-width:1150px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}.brand{font-weight:800;font-size:19px}.userbox{display:flex;align-items:center;gap:9px;font-size:13px}.icon-btn{border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;border-radius:9px;padding:8px 10px}.nav{max-width:1150px;margin:14px auto 0;padding:0 18px;display:flex;gap:8px;overflow:auto}.nav button{white-space:nowrap;border:0;background:#fff;color:#445047;border-radius:10px;padding:10px 14px;font-weight:700}.nav button.active{background:var(--green);color:#fff}main{max-width:1150px;margin:0 auto;padding:18px}.page{display:none}.page.active{display:block}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:17px;box-shadow:0 3px 12px rgba(20,40,25,.04)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat{background:#fff;border-radius:14px;padding:15px;border:1px solid var(--line)}.stat small{color:var(--muted);display:block}.stat strong{display:block;font-size:22px;margin-top:5px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 12px}.section-title h2{font-size:20px;margin:0}.secondary{border:1px solid #cbd3cb;background:#fff;color:#344238;border-radius:9px;padding:11px 14px;font-weight:700}.danger{border:1px solid #e2b8b5;background:#fff;color:var(--danger);border-radius:9px;padding:11px 14px;font-weight:700}.empty{padding:30px 15px;text-align:center;color:var(--muted);background:#fff;border-radius:14px;border:1px dashed #cbd4cb}.table-wrap{overflow:auto;background:#fff;border-radius:14px;border:1px solid var(--line);margin-bottom:14px}table{width:100%;border-collapse:collapse;min-width:520px}th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{background:#f5f7f5;color:#475047}tr.total td{font-weight:800;background:#f5f7f5}.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}.modal-backdrop.show{display:flex}.modal{width:min(660px,100%);background:#fff;border-radius:18px;padding:21px;max-height:92vh;overflow:auto}.modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:15px}.close{border:0;background:#eef1ee;border-radius:8px;padding:7px 10px}.fractions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:13px 0}.fraction{border:2px solid #d9e0d9;background:#fff;border-radius:11px;padding:14px 5px;font-weight:800;color:#344238}.fraction.selected{border-color:var(--green);background:#edf5ef;color:var(--green)}.calc-box{background:#f3f7f3;border-radius:12px;padding:14px;line-height:1.7;margin:12px 0}.list-item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}.list-item:last-child{border-bottom:0}.actions{display:flex;gap:8px;flex-wrap:wrap}.note{font-size:12px;color:var(--muted);line-height:1.5}.pill{display:inline-block;font-size:11px;padding:5px 8px;border-radius:999px;background:#edf4ee;color:var(--green);font-weight:800}.work-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.status-dot{width:11px;height:11px;border-radius:50%;background:#aaa;display:inline-block}.status-dot.on{background:#7be39b}.hero{background:linear-gradient(135deg,#245c38,#347a4d);color:#fff;border-radius:17px;padding:20px;margin-bottom:15px}.hero h2{margin-bottom:7px}.hero .muted{color:rgba(255,255,255,.82);line-height:1.5}.hero .bigbtn{width:auto;padding:16px 22px;font-size:17px;background:#fff;color:var(--green)}.tag{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:8px 13px;margin:3px;font-size:13px;cursor:pointer;background:#fff}.tag.selected{background:var(--green);color:#fff;border-color:var(--green)}.tabs{display:flex;gap:8px;margin:10px 0}.tab{flex:1;border:2px solid #d9e0d9;background:#fff;border-radius:11px;padding:11px;font-weight:700;color:#344238}.tab.active{border-color:var(--green);background:#edf5ef;color:var(--green)}.stepper{display:flex;gap:8px;align-items:center}.stepper input{text-align:center;font-size:20px;font-weight:800}.stepper button{width:54px;height:50px;border:2px solid #d9e0d9;background:#fff;border-radius:11px;font-size:24px;font-weight:800;color:var(--green)}.pickbtn{text-align:left;border:1px solid var(--line);padding:16px}.small-btn{border:1px solid #ccd3cc;background:#fff;border-radius:8px;padding:7px 9px}.danger-text{color:var(--danger)}.inline-in{width:auto;padding:8px;max-width:110px}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#182018;color:#fff;padding:12px 18px;border-radius:12px;z-index:60;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s}.toast.show{opacity:.95}
+:root{--bg:#eef1ed;--card:#fff;--text:#182018;--muted:#6d756d;--green:#245c38;--green2:#347a4d;--line:#dce1dc;--danger:#b23a32;--blue:#315f91;--shadow:0 8px 24px rgba(25,45,30,.08);
+--surface:#f5f7f5;--soft:#edf5ef;--calc:#f3f7f3;--field:#fff;--bd:#ccd3cc;--bd2:#cbd3cb;--bd3:#d9e0d9;--txt2:#344238;--navtxt:#445047;--close:#eef1ee;--accent:#245c38;--dangerbd:#e2b8b5;--dangerbg:#fff8f7;--emptybd:#cbd4cb;--thtxt:#475047;--topbar:#245c38;--hero1:#245c38;--hero2:#347a4d;--toast:#182018;--toasttxt:#fff;color-scheme:light}
+:root[data-theme="dark"]{--bg:#0f140f;--card:#1a211b;--text:#e4eae4;--muted:#93a093;--green:#2f7d4a;--green2:#3a9059;--line:#2b352c;--danger:#ef7d75;--blue:#7aa8dc;--shadow:0 8px 24px rgba(0,0,0,.5);
+--surface:#202821;--soft:#1f3326;--calc:#1d2a20;--field:#121812;--bd:#3a463b;--bd2:#3a463b;--bd3:#3a463b;--txt2:#d3dbd3;--navtxt:#c7d1c7;--close:#2a332b;--accent:#7ddc9b;--dangerbd:#5a2f2c;--dangerbg:#2a1a19;--emptybd:#3a463b;--thtxt:#b6c1b6;--topbar:#1c3d28;--hero1:#1f4a30;--hero2:#2c6a44;--toast:#e4eae4;--toasttxt:#0f140f;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer;color:var(--text)}.hidden{display:none!important}
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}.login-card{width:min(430px,100%);background:var(--card);border-radius:20px;padding:30px;box-shadow:var(--shadow)}.logo{width:58px;height:58px;border-radius:16px;background:var(--green);color:#fff;display:grid;place-items:center;font-size:28px;margin-bottom:18px}h1,h2,h3{margin-top:0}.subtitle{color:var(--muted);line-height:1.5}.field{margin:14px 0}.field label{display:block;font-weight:700;font-size:14px;margin-bottom:7px}input,select,textarea{width:100%;padding:13px 14px;border:1px solid var(--bd);border-radius:11px;background:var(--field);color:var(--text);outline:none}textarea{min-height:90px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:var(--green)}.primary{width:100%;border:0;background:var(--green);color:#fff;padding:14px;border-radius:11px;font-weight:700}.primary:hover{background:var(--green2)}
+.app{min-height:100vh}.topbar{background:var(--topbar);color:#fff;padding:14px 18px;position:sticky;top:0;z-index:10}.topbar-inner{max-width:1150px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:15px}.brand{font-weight:800;font-size:19px}.userbox{display:flex;align-items:center;gap:9px;font-size:13px}.icon-btn{border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;border-radius:9px;padding:8px 10px}.nav{max-width:1150px;margin:14px auto 0;padding:0 18px;display:flex;gap:8px;overflow:auto}.nav button{white-space:nowrap;border:0;background:var(--card);color:var(--navtxt);border-radius:10px;padding:10px 14px;font-weight:700}.nav button.active{background:var(--green);color:#fff}main{max-width:1150px;margin:0 auto;padding:18px}.page{display:none}.page.active{display:block}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px}.card{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:17px;box-shadow:0 3px 12px rgba(20,40,25,.04)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.stat{background:var(--card);border-radius:14px;padding:15px;border:1px solid var(--line)}.stat small{color:var(--muted);display:block}.stat strong{display:block;font-size:22px;margin-top:5px}.section-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 12px}.section-title h2{font-size:20px;margin:0}.secondary{border:1px solid var(--bd2);background:var(--card);color:var(--txt2);border-radius:9px;padding:11px 14px;font-weight:700}.danger{border:1px solid var(--dangerbd);background:var(--card);color:var(--danger);border-radius:9px;padding:11px 14px;font-weight:700}.empty{padding:30px 15px;text-align:center;color:var(--muted);background:var(--card);border-radius:14px;border:1px dashed var(--emptybd)}.table-wrap{overflow:auto;background:var(--card);border-radius:14px;border:1px solid var(--line);margin-bottom:14px}table{width:100%;border-collapse:collapse;min-width:520px}th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{background:var(--surface);color:var(--thtxt)}tr.total td{font-weight:800;background:var(--surface)}.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.48);display:none;align-items:center;justify-content:center;padding:18px;z-index:30}.modal-backdrop.show{display:flex}.modal{width:min(660px,100%);background:var(--card);border-radius:18px;padding:21px;max-height:92vh;overflow:auto}.modal-header{display:flex;justify-content:space-between;align-items:flex-start;gap:15px}.close{border:0;background:var(--close);border-radius:8px;padding:7px 10px}.fractions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:13px 0}.fraction{border:2px solid var(--bd3);background:var(--card);border-radius:11px;padding:14px 5px;font-weight:800;color:var(--txt2)}.fraction.selected{border-color:var(--green);background:var(--soft);color:var(--accent)}.calc-box{background:var(--calc);border-radius:12px;padding:14px;line-height:1.7;margin:12px 0}.list-item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}.list-item:last-child{border-bottom:0}.actions{display:flex;gap:8px;flex-wrap:wrap}.note{font-size:12px;color:var(--muted);line-height:1.5}.pill{display:inline-block;font-size:11px;padding:5px 8px;border-radius:999px;background:var(--soft);color:var(--accent);font-weight:800}.work-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.status-dot{width:11px;height:11px;border-radius:50%;background:#aaa;display:inline-block}.status-dot.on{background:#7be39b}.hero{background:linear-gradient(135deg,var(--hero1),var(--hero2));color:#fff;border-radius:17px;padding:20px;margin-bottom:15px}.hero h2{margin-bottom:7px}.hero .muted{color:rgba(255,255,255,.82);line-height:1.5}.hero .bigbtn{width:auto;padding:16px 22px;font-size:17px;background:#fff;color:#245c38}.tag{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:8px 13px;margin:3px;font-size:13px;cursor:pointer;background:var(--card);color:var(--text)}.tag.selected{background:var(--green);color:#fff;border-color:var(--green)}.tabs{display:flex;gap:8px;margin:10px 0}.tab{flex:1;border:2px solid var(--bd3);background:var(--card);border-radius:11px;padding:11px;font-weight:700;color:var(--txt2)}.tab.active{border-color:var(--green);background:var(--soft);color:var(--accent)}.stepper{display:flex;gap:8px;align-items:center}.stepper input{text-align:center;font-size:20px;font-weight:800}.stepper button{width:54px;height:50px;border:2px solid var(--bd3);background:var(--card);border-radius:11px;font-size:24px;font-weight:800;color:var(--accent)}.pickbtn{text-align:left;border:1px solid var(--line);padding:16px}.small-btn{border:1px solid var(--bd);background:var(--card);border-radius:8px;padding:7px 9px}.danger-text{color:var(--danger)}.inline-in{width:auto;padding:8px;max-width:110px}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--toast);color:var(--toasttxt);padding:12px 18px;border-radius:12px;z-index:60;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s}.toast.show{opacity:.95}
 .chat-fab{position:fixed;right:16px;bottom:16px;width:58px;height:58px;border-radius:50%;border:0;background:var(--green);color:#fff;font-size:26px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:25}
-.chat-panel{position:fixed;right:12px;bottom:84px;width:min(390px,calc(100vw - 24px));height:min(540px,72vh);background:#fff;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.28);z-index:26;display:none;flex-direction:column;overflow:hidden}
+.chat-panel{position:fixed;right:12px;bottom:84px;width:min(390px,calc(100vw - 24px));height:min(540px,72vh);background:var(--card);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.28);z-index:26;display:none;flex-direction:column;overflow:hidden}
 .chat-panel.show{display:flex}.chat-head{background:var(--green);color:#fff;padding:12px 14px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
-.chat-msgs{flex:1;overflow:auto;padding:12px;background:#f5f7f5}.msg{max-width:86%;padding:9px 12px;border-radius:14px;margin:6px 0;line-height:1.4;font-size:14px;white-space:pre-wrap;word-wrap:break-word}
-.msg.user{background:var(--green);color:#fff;margin-left:auto;border-bottom-right-radius:4px}.msg.bot{background:#fff;border:1px solid var(--line);border-bottom-left-radius:4px}.msg.tool{background:transparent;color:var(--muted);font-size:12px;padding:2px 6px;max-width:100%}
-.chat-in{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}.chat-in button{width:auto;padding:0 18px}.danger-zone{border-color:#e2b8b5;background:#fff8f7}
-@media(max-width:800px){.stats{grid-template-columns:1fr 1fr}}@media(max-width:650px){.topbar-inner{align-items:flex-start}.userbox{flex-direction:column;align-items:flex-end}.modal{padding:17px}}
+.chat-msgs{flex:1;overflow:auto;padding:12px;background:var(--surface)}.msg{max-width:86%;padding:9px 12px;border-radius:14px;margin:6px 0;line-height:1.4;font-size:14px;white-space:pre-wrap;word-wrap:break-word}
+.msg.user{background:var(--green);color:#fff;margin-left:auto;border-bottom-right-radius:4px}.msg.bot{background:var(--card);border:1px solid var(--line);border-bottom-left-radius:4px}.msg.tool{background:transparent;color:var(--muted);font-size:12px;padding:2px 6px;max-width:100%}
+.chat-in{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}.chat-in button{width:auto;padding:0 18px}.danger-zone{border-color:var(--dangerbd);background:var(--dangerbg)}
+#printArea{display:none}
+@media print{body>*:not(#printArea){display:none!important}body{background:#fff!important}#printArea{display:block!important;--text:#000;--card:#fff;--line:#bbb;--muted:#444;--surface:#eee;--thtxt:#000;--accent:#000;color:#000;background:#fff;padding:8mm}#printArea .table-wrap{overflow:visible;border-color:#999}#printArea table{min-width:0}}
+@media(max-width:800px){.stats{grid-template-columns:1fr 1fr}}@media(max-width:650px){.topbar-inner{align-items:flex-start}.userbox{flex-wrap:wrap;justify-content:flex-end;max-width:72%}.modal{padding:17px}}
 </style>
 </head>
 <body>
@@ -35,7 +42,7 @@
 <div id="app" class="app hidden">
 <header class="topbar"><div class="topbar-inner">
   <div class="brand">🌲 Metsapraktika</div>
-  <div class="userbox"><span class="pill" id="syncStatus" style="cursor:pointer" onclick="syncPillClick()">☁ …</span><span class="pill" id="connStatus">🟢 Ühendatud</span><span id="userName"></span><button class="icon-btn" id="logoutBtn">Logi välja</button></div>
+  <div class="userbox"><span class="pill" id="syncStatus" style="cursor:pointer" onclick="syncPillClick()">☁ …</span><span class="pill" id="connStatus">🟢 Ühendatud</span><span id="userName"></span><button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Tume / hele">🌙</button><button class="icon-btn" id="logoutBtn">Logi välja</button></div>
 </div><nav class="nav">
   <button data-page="home" class="active">🏠 Avaleht</button>
   <button data-page="summary">📊 Kokkuvõte</button>
@@ -63,12 +70,16 @@
   <div id="todaySummary" class="grid"></div>
   <div class="section-title"><h2>Viimased kanded</h2></div>
   <div class="card" id="recentLoads"></div>
+  <div class="section-title"><h2>Märkmed ja sündmused</h2></div>
+  <div class="card" id="recentEvents"></div>
 </section>
 
 <section id="summary" class="page">
   <div class="section-title"><h2>Kokkuvõte</h2>
-    <select id="summaryPeriod" style="width:auto"><option value="today">Praegune päev</option><option value="week">See nädal</option><option value="month">See kuu</option><option value="all">Kõik</option></select>
+    <select id="summaryPeriod" style="width:auto"><option value="today">Praegune päev</option><option value="week">See nädal</option><option value="month">See kuu</option><option value="lastmonth">Eelmine kuu</option><option value="all">Kõik</option><option value="custom">Vali kuupäevad…</option></select>
   </div>
+  <div id="customRange" class="card hidden" style="margin-bottom:12px"><div class="grid"><div class="field"><label>Alates</label><input type="date" id="rangeFrom"></div><div class="field"><label>Kuni</label><input type="date" id="rangeTo"></div></div></div>
+  <div class="actions" style="margin-bottom:12px"><button class="primary" style="width:auto" onclick="openReport()">📤 Kokkuvõte bossile (jaga / PDF / CSV)</button></div>
   <div id="summaryContent"></div>
 </section>
 
@@ -98,6 +109,9 @@
     <div class="field"><label>Ettevõte (vaikimisi)</label><input id="setCompany" placeholder="Näiteks Silvara OÜ"></div>
     <div class="field"><label>Kool</label><input id="setSchool" placeholder="Näiteks Luua Metsanduskool"></div></div>
 
+  <div class="section-title"><h2>Välimus</h2></div>
+  <div class="card"><div class="field"><label>Teema</label><select id="setTheme"><option value="auto">Automaatne (järgib telefoni)</option><option value="light">Hele</option><option value="dark">Tume</option></select></div></div>
+
   <div class="section-title"><h2>Palk</h2></div>
   <div class="card">
     <div class="field"><label>Arvutan palka</label><select id="setPayMode"><option value="hourly">tunnipalga järgi</option><option value="tm">tihumeetrite järgi</option></select></div>
@@ -117,6 +131,10 @@
     <div class="field"><label>Töö lõpeb automaatselt kell (tund 0–23; −1 = ei lõpeta automaatselt, sobib öövahetusele)</label><input id="setAutoEnd" type="number" min="-1" max="23"></div>
     <div class="field"><label>Küsi „kas töö käib veel?", kui koormaid pole … tundi</label><select id="setIdle"><option value="0">ära küsi</option><option value="1">1 h</option><option value="2">2 h</option><option value="3">3 h</option><option value="4">4 h</option></select></div>
   </div>
+
+  <div class="section-title"><h2>Märkmed ja sündmused</h2></div>
+  <div class="card"><div class="field"><label>Sündmuste tüübid (komaga eraldatud)</label><input id="setEventTypes" placeholder="Tankimine, Määrimine, Hooldus/rike, Lintide paigaldus"></div>
+    <p class="note">Töö ajal: 📝 Märge avab vormi, ⛽ Tankimine lisab ühe puudutusega tankimise (kui "Tankimine" on nimekirjas). Arvud ja märkused lähevad kokkuvõtetesse ja bossi aruandesse.</p></div>
 
   <div class="section-title"><h2>Teavitused telefonis</h2></div>
   <div class="card">
@@ -212,6 +230,23 @@
   <p class="note" id="dpStatus" style="margin-top:10px"></p>
 </div></div>
 
+<div id="eventModal" class="modal-backdrop"><div class="modal">
+  <div class="modal-header"><h2>📝 Märge / sündmus</h2><button class="close" onclick="closeModal('eventModal')">✕</button></div>
+  <div id="evTypes" style="margin:8px 0"></div>
+  <div class="field hidden" id="evLitersBox"><label>Kogus (l), valikuline</label><input id="evLiters" type="number" step="0.1" min="0" inputmode="decimal"></div>
+  <div class="field"><label>Märge (valikuline, tüübi "Märge" korral kohustuslik)</label><textarea id="evText" rows="3" placeholder="nt masin kuumenes, vihm, ootasin autot…"></textarea></div>
+  <button class="primary" onclick="saveEvent()">SALVESTA</button>
+</div></div>
+
+<div id="reportModal" class="modal-backdrop"><div class="modal" style="width:min(760px,100%)">
+  <div class="modal-header"><h2>📤 Kokkuvõte bossile</h2><button class="close" onclick="closeModal('reportModal')">✕</button></div>
+  <div style="margin:8px 0"><span class="tag" onclick="setReportPreset('month')">See kuu</span><span class="tag" onclick="setReportPreset('lastmonth')">Eelmine kuu</span><span class="tag" onclick="setReportPreset('week')">See nädal</span></div>
+  <div class="grid"><div class="field"><label>Alates</label><input type="date" id="repFrom"></div><div class="field"><label>Kuni</label><input type="date" id="repTo"></div></div>
+  <div class="actions" style="margin:6px 0"><label class="note"><input type="checkbox" id="repDays" checked style="width:auto;padding:0"> tööde loetelu</label><label class="note"><input type="checkbox" id="repNotes" checked style="width:auto;padding:0"> märkused</label><label class="note"><input type="checkbox" id="repPay" style="width:auto;padding:0"> raha</label></div>
+  <div id="repPreview" style="margin:12px 0"></div>
+  <div class="actions"><button class="primary" style="width:auto" onclick="copyReport()">📋 Kopeeri tekst</button><button class="secondary" onclick="shareReport()">📤 Jaga</button><button class="secondary" onclick="csvReport('works')">⬇ CSV (tööd)</button><button class="secondary" onclick="csvReport('loads')">⬇ CSV (koormad)</button><button class="secondary" onclick="printReport()">🖨 Prindi / PDF</button></div>
+</div></div>
+
 <div id="dayModal" class="modal-backdrop"><div class="modal">
   <div class="modal-header"><h2 id="dayTitle">Päev</h2><button class="close" onclick="closeModal('dayModal')">✕</button></div>
   <div id="dayBody"></div>
@@ -228,6 +263,7 @@
 <button class="chat-fab hidden" id="chatFab" onclick="toggleChat()" title="Abiline">💬</button>
 <div class="chat-panel" id="chatPanel"><div class="chat-head"><span>🤖 Abiline</span><button class="close" onclick="toggleChat()">✕</button></div><div class="chat-msgs" id="chatMsgs"></div>
 <div class="chat-in"><input id="chatInput" placeholder="nt: 3 koormat männipalk 45 tm" autocomplete="off"><button class="primary" id="chatSend" onclick="sendChat()">➤</button></div></div>
+<div id="printArea"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -271,6 +307,20 @@ const LAST_PIN_KEY="metsapraktika_lastPin";
 function deviceCfg(){try{return JSON.parse(localStorage.getItem(DEVICE_KEY)||"{}")}catch(e){return {}}}
 function setDeviceCfg(p){const c={...deviceCfg(),...p};try{localStorage.setItem(DEVICE_KEY,JSON.stringify(c))}catch(e){}}
 function uid(p){return p+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+const DEFAULT_EVENT_TYPES=["Tankimine","Määrimine","Hooldus/rike","Lintide paigaldus"];
+const FUEL="Tankimine";
+function isFuel(t){return String(t).toLowerCase()===FUEL.toLowerCase()}
+const THEME_KEY="metsapraktika_theme";
+function themeMode(){return localStorage.getItem(THEME_KEY)||"auto"}
+function applyTheme(){
+  const m=themeMode(),dark=m==="dark"||(m==="auto"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.setAttribute("data-theme",dark?"dark":"light");
+  const mt=document.querySelector('meta[name=theme-color]');if(mt)mt.setAttribute("content",dark?"#1c3d28":"#245c38");
+  const b=document.getElementById("themeBtn");if(b)b.textContent=dark?"☀️":"🌙";
+  const sel=document.getElementById("setTheme");if(sel)sel.value=m;
+}
+function setTheme(m){try{localStorage.setItem(THEME_KEY,m)}catch(e){}applyTheme()}
+function toggleTheme(){setTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark")}
 
 // ============ State / storage ============
 function slugify(name){return String(name||"").trim().toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"kasutaja"}
@@ -279,10 +329,10 @@ function cloneDefaults(){return JSON.parse(JSON.stringify(defaultAssortments))}
 function numOr(v,d){const n=Number(v);return v===undefined||v===null||v===""||!Number.isFinite(n)?d:n}
 function normalizeState(saved){
   const fresh={user:"",company:"",school:"",assortments:cloneDefaults(),works:[],diary:{},diaryFileName:"praktikapaevik.docx",diaryFileBase64:DIARY_BASE64,
-    settings:{autoEndHour:22,crossSectionArea:4,idleHours:2,payMode:"hourly",hourlyRate:0,tmRate:0,ntfyTopic:""},tomb:{},resetAt:0,known:[],miscH:0,miscMod:0};
+    settings:{autoEndHour:22,crossSectionArea:4,idleHours:2,payMode:"hourly",hourlyRate:0,tmRate:0,ntfyTopic:"",eventTypes:[...DEFAULT_EVENT_TYPES]},tomb:{},resetAt:0,known:[],miscH:0,miscMod:0};
   if(!saved||typeof saved!=="object")return fresh;
   const st=saved.settings||{};
-  const works=(Array.isArray(saved.works)?saved.works:(Array.isArray(saved.days)?saved.days:[])).map(w=>({...w,lastPing:w.lastPing||null,loads:(Array.isArray(w.loads)?w.loads:[]).map(l=>({count:1,...l}))}));
+  const works=(Array.isArray(saved.works)?saved.works:(Array.isArray(saved.days)?saved.days:[])).map(w=>({...w,lastPing:w.lastPing||null,events:Array.isArray(w.events)?w.events:[],loads:(Array.isArray(w.loads)?w.loads:[]).map(l=>({count:1,...l}))}));
   const diary=(saved.diary&&typeof saved.diary==="object")?saved.diary:{};
   works.forEach(w=>{ if(!diary[w.date]&&(w.personalNote||(w.outcomes&&w.outcomes.length)||w.diaryExportedAt)){diary[w.date]={personalNote:w.personalNote||"",outcomes:w.outcomes||[],activitiesText:"",edited:false,exportedAt:w.diaryExportedAt||null}} });
   return {
@@ -292,7 +342,7 @@ function normalizeState(saved){
     diaryFileName:saved.diaryFileName||"praktikapaevik.docx",
     diaryFileBase64:saved.diaryFileBase64||DIARY_BASE64,
     settings:{autoEndHour:numOr(st.autoEndHour,22),crossSectionArea:numOr(st.crossSectionArea,4)>0?numOr(st.crossSectionArea,4):4,idleHours:numOr(st.idleHours,2),
-      payMode:st.payMode==="tm"?"tm":"hourly",hourlyRate:numOr(st.hourlyRate,0),tmRate:numOr(st.tmRate,0),ntfyTopic:String(st.ntfyTopic||"")},
+      payMode:st.payMode==="tm"?"tm":"hourly",hourlyRate:numOr(st.hourlyRate,0),tmRate:numOr(st.tmRate,0),ntfyTopic:String(st.ntfyTopic||""),eventTypes:(Array.isArray(st.eventTypes)&&st.eventTypes.length)?st.eventTypes.map(String):[...DEFAULT_EVENT_TYPES]},
     tomb:(saved.tomb&&typeof saved.tomb==="object")?saved.tomb:{},resetAt:Number(saved.resetAt)||0,known:Array.isArray(saved.known)?saved.known:[],miscH:saved.miscH,miscMod:Number(saved.miscMod)||0
   };
 }
@@ -306,7 +356,7 @@ function stripMeta(o){const c={...o};delete c._h;delete c.mod;return c}
 function touch(o){const h=hashStr(JSON.stringify(stripMeta(o)));if(o._h!==h){o._h=h;o.mod=Date.now()}}
 function miscPayload(s){return {company:s.company,school:s.school,settings:s.settings,diaryFileName:s.diaryFileName,diaryFileBase64:s.diaryFileBase64}}
 function markPristine(s){s.assortments.forEach(a=>{a._h=hashStr(JSON.stringify(stripMeta(a)));a.mod=0});s.miscH=hashStr(JSON.stringify(miscPayload(s)));s.miscMod=0}
-function currentIds(s){const ids=new Set();s.works.forEach(w=>{ids.add(w.id);(w.loads||[]).forEach(l=>ids.add(l.id))});s.assortments.forEach(a=>ids.add(a.id));Object.keys(s.diary).forEach(d=>ids.add("diary:"+d));return ids}
+function currentIds(s){const ids=new Set();s.works.forEach(w=>{ids.add(w.id);(w.loads||[]).forEach(l=>ids.add(l.id));(w.events||[]).forEach(e=>ids.add(e.id))});s.assortments.forEach(a=>ids.add(a.id));Object.keys(s.diary).forEach(d=>ids.add("diary:"+d));return ids}
 function touchAll(){
   state.works.forEach(w=>touch(w));state.assortments.forEach(a=>touch(a));Object.values(state.diary).forEach(d=>touch(d));
   const mh=hashStr(JSON.stringify(miscPayload(state)));if(state.miscH!==mh){state.miscH=mh;state.miscMod=Date.now()}
@@ -327,10 +377,11 @@ function mergeStates(a,b){
     if(!cur){wm.set(w.id,clone(w));return}
     const base=(w.mod||0)>(cur.mod||0)?clone(w):cur;
     const lm=new Map();[...(cur.loads||[]),...(w.loads||[])].forEach(l=>{if(!lm.has(l.id))lm.set(l.id,l)});
-    base.loads=[...lm.values()];wm.set(w.id,base);
+    base.loads=[...lm.values()];
+    const em=new Map();[...(cur.events||[]),...(w.events||[])].forEach(e=>{if(!em.has(e.id))em.set(e.id,e)});base.events=[...em.values()];wm.set(w.id,base);
   }));
   const works=[...wm.values()];
-  works.forEach(w=>{w.loads=(w.loads||[]).filter(l=>!tomb[l.id]&&!(reset>0&&new Date(l.time).getTime()<=reset)).sort((x,y)=>String(x.time).localeCompare(String(y.time)))});
+  works.forEach(w=>{w.events=(w.events||[]).filter(e=>!tomb[e.id]&&!(reset>0&&new Date(e.time).getTime()<=reset)).sort((x,y)=>String(x.time).localeCompare(String(y.time)));w.loads=(w.loads||[]).filter(l=>!tomb[l.id]&&!(reset>0&&new Date(l.time).getTime()<=reset)).sort((x,y)=>String(x.time).localeCompare(String(y.time)))});
   works.sort((x,y)=>String(y.start).localeCompare(String(x.start)));
   works.filter(w=>!w.end).slice(1).forEach(w=>{w.end=lastActivityIso(w)});
   const am=new Map();[a.assortments||[],b.assortments||[]].forEach(list=>list.forEach(x=>{if(tomb[x.id])return;const cur=am.get(x.id);if(!cur||(x.mod||0)>(cur.mod||0))am.set(x.id,clone(x))}));
@@ -483,6 +534,7 @@ function workPay(w){
   const tm=w.loads.reduce((s,l)=>s+(Number(l.tm)||0)*rateFor(l.assortmentId),0);
   return {hourly,tm,main:state.settings.payMode==="tm"?tm:hourly};
 }
+function customRangeVals(){const a=document.getElementById("rangeFrom"),b=document.getElementById("rangeTo"),k=todayKey();return [(a&&a.value)||k.slice(0,8)+"01",(b&&b.value)||k]}
 function homeDay(){
   const a=activeWork();if(a)return a.date;
   let last=null;state.works.forEach(w=>{if(!last||String(w.start)>String(last.start))last=w});
@@ -493,15 +545,18 @@ function periodBounds(p){
   const now=new Date(),key=todayKey(now);
   if(p==="today"){const hd=homeDay();return [hd,hd]}
   if(p==="week"){const d=new Date(now);d.setDate(d.getDate()-((d.getDay()+6)%7));return [todayKey(d),key]}
+  if(p==="lastmonth"){const d=new Date(now.getFullYear(),now.getMonth()-1,1),e=new Date(now.getFullYear(),now.getMonth(),0);return [todayKey(d),todayKey(e)]}
+  if(p==="custom")return customRangeVals();
   if(p==="month")return [`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-01`,key];
   return ["0000-00-00","9999-99-99"];
 }
 function worksInPeriod(p){const [a,b]=periodBounds(p);return state.works.filter(w=>w.date>=a&&w.date<=b)}
 function summarize(list){
-  const days=new Set(),byA={},byDay={},byLank={};let hours=0,loads=0,tm=0,payH=0,payT=0;
+  const days=new Set(),byA={},byDay={},byLank={};let hours=0,loads=0,tm=0,payH=0,payT=0,refuels=0,liters=0,noteCount=0;const evc={};
   list.forEach(w=>{
     const st=workStats(w),h=workHours(w),p=workPay(w);
     days.add(w.date);hours+=h;loads+=st.loads;tm+=st.tm;payH+=p.hourly;payT+=p.tm;
+    (w.events||[]).forEach(e=>{if(e.type==="Märge")noteCount++;else{evc[e.type]=(evc[e.type]||0)+1}if(isFuel(e.type)){refuels++;liters+=Number(e.liters)||0}});
     w.loads.forEach(l=>{const k=l.name||"Sortiment täpsustamata";if(!byA[k])byA[k]={name:k,tm:0,loads:0,pay:0};byA[k].tm+=Number(l.tm)||0;byA[k].loads+=loadCount(l);byA[k].pay+=(Number(l.tm)||0)*rateFor(l.assortmentId)});
     if(!byDay[w.date])byDay[w.date]={date:w.date,hours:0,loads:0,tm:0,payH:0,payT:0};
     const d=byDay[w.date];d.hours+=h;d.loads+=st.loads;d.tm+=st.tm;d.payH+=p.hourly;d.payT+=p.tm;
@@ -509,7 +564,7 @@ function summarize(list){
     byLank[lk].hours+=h;byLank[lk].loads+=st.loads;byLank[lk].tm+=st.tm;
   });
   const main=state.settings.payMode==="tm"?payT:payH;
-  return {days,hours,loads,tm,payH,payT,main,byA,byDay,byLank};
+  return {days,hours,loads,tm,payH,payT,main,byA,byDay,byLank,refuels,liters,noteCount,evc};
 }
 
 // ============ Notifications ============
@@ -578,7 +633,7 @@ function checkAutoClose(){
     renderAll();
   }
 }
-function lastActivityIso(w){return [w.start,w.lastPing,...w.loads.map(l=>l.time)].filter(Boolean).sort().pop()}
+function lastActivityIso(w){return [w.start,w.lastPing,...w.loads.map(l=>l.time),...(w.events||[]).map(e=>e.time)].filter(Boolean).sort().pop()}
 let idlePromptFor=null;
 function checkIdle(){
   const w=activeWork(),h=Number(state.settings.idleHours);
@@ -744,6 +799,9 @@ function buildActivitiesText(date){
   if(ws.length>1&&allLoads>0)parts.push(`Päeva kokku: ${allLoads} koormat, ${num(allTm)} tm.`);
   const sl=Object.entries(by).map(([n,t])=>`${n} ${num(t)} tm`).join(", ");
   if(sl)parts.push(`Sortimendid: ${sl}`);
+  const evc={};let fuelL=0;ws.forEach(w=>(w.events||[]).forEach(e=>{if(e.type==="Märge")return;evc[e.type]=(evc[e.type]||0)+1;if(isFuel(e.type))fuelL+=Number(e.liters)||0}));
+  const evs=Object.keys(evc).map(k=>`${k}: ${evc[k]}×${isFuel(k)&&fuelL>0?" (kokku "+num(fuelL,1)+" l)":""}`).join(", ");
+  if(evs)parts.push(`Sündmused: ${evs}`);
   return parts.join("\n");
 }
 function openDiaryPreview(date){
@@ -762,7 +820,7 @@ function renderDiaryModal(){
     <b>${esc(w.lank||"(lank puudub)")}</b> <span class="note">${esc([w.company,w.kvartal?"Kvartal "+w.kvartal:"",w.eraldis?"Eraldis "+w.eraldis:"",w.machine].filter(Boolean).join(" · "))}</span> <button class="small-btn danger-text" style="float:right" onclick="deleteWork('${w.id}')">🗑 Kustuta töö</button>
     <div class="actions" style="margin:8px 0"><label class="note">Algus <input class="inline-in" type="time" value="${timeInputVal(w.start)}" onchange="editWorkTime('${w.id}','start',this.value)"></label>
     ${w.end?`<label class="note">Lõpp <input class="inline-in" type="time" value="${timeInputVal(w.end)}" onchange="editWorkTime('${w.id}','end',this.value)"></label>`:`<span class="pill">käib</span>`}</div>
-    ${w.loads.map(l=>`<div class="list-item"><div>${fmtTime(l.time)} · ${esc(l.name||"täpsustamata")} · ${loadCount(l)} k · <b>${num(l.tm)} tm</b></div><button class="small-btn danger-text" onclick="deleteLoad('${w.id}','${l.id}')">✕</button></div>`).join("")||'<div class="note">Koormaid pole.</div>'}
+    ${w.loads.map(l=>`<div class="list-item"><div>${fmtTime(l.time)} · ${esc(l.name||"täpsustamata")} · ${loadCount(l)} k · <b>${num(l.tm)} tm</b></div><button class="small-btn danger-text" onclick="deleteLoad('${w.id}','${l.id}')">✕</button></div>`).join("")||'<div class="note">Koormaid pole.</div>'}${eventsHtml(w)}
   </div>`).join("");
   document.getElementById("dpStatus").textContent=e.exportedAt?`Viimati Wordi lisatud: ${new Date(e.exportedAt).toLocaleString("et-EE")}`:"Pole veel Wordi lisatud.";
 }
@@ -859,9 +917,9 @@ function renderHome(){
   document.getElementById("workDot").classList.toggle("on",!!w);
   document.getElementById("heroLank").textContent=w?("Lank "+(w.lank||"—")):"Alusta tööd langil";
   document.getElementById("heroMeta").textContent=w?[w.company,w.kvartal?"Kvartal "+w.kvartal:"",w.eraldis?"Eraldis "+w.eraldis:"",w.machine,w.workType].filter(Boolean).join(" · "):"Vali lank, et koormaid lisada ja tunde arvestada.";
-  if(w){const st=workStats(w);document.getElementById("heroLive").textContent=`Sellel langil: ${st.loads} koormat · ${num(st.tm)} tm · ${fmtDuration(workHours(w))} h`}else document.getElementById("heroLive").textContent="";
+  if(w){const st=workStats(w);document.getElementById("heroLive").textContent=`Sellel langil: ${st.loads} koormat · ${num(st.tm)} tm · ${fmtDuration(workHours(w))} h${fuelCount(w)?" · ⛽ "+fuelCount(w):""}${noteCountOf(w)?" · 📝 "+noteCountOf(w):""}`}else document.getElementById("heroLive").textContent="";
   document.getElementById("heroActions").innerHTML=w
-    ?`<button class="primary bigbtn" onclick="openLoadModal()">+ LISA KOOREM</button><button class="secondary" onclick="repeatLastLoad()">↻ Sama uuesti</button><button class="secondary" onclick="switchLank()">⇄ Vaheta lanki</button><button class="danger" onclick="finishWork()">⏹ Lõpeta töö</button>`
+    ?`<button class="primary bigbtn" onclick="openLoadModal()">+ LISA KOOREM</button><button class="secondary" onclick="repeatLastLoad()">↻ Sama uuesti</button>${state.settings.eventTypes.some(isFuel)?'<button class="secondary" onclick="quickFuel()">⛽ Tankimine</button>':""}<button class="secondary" onclick="openEventModal()">📝 Märge</button><button class="secondary" onclick="switchLank()">⇄ Vaheta lanki</button><button class="danger" onclick="finishWork()">⏹ Lõpeta töö</button>`
     :`<button class="primary bigbtn" onclick="openStartWorkModal()">▶ ALUSTA TÖÖD LANGIL</button>`;
   const s=summarize(worksInPeriod("today"));
   const hd=homeDay(),isToday=hd===todayKey();
@@ -876,15 +934,16 @@ function renderHome(){
   const items=[];worksInPeriod("today").forEach(wk=>wk.loads.forEach(l=>items.push({w:wk,l})));
   items.sort((a,b)=>b.l.time.localeCompare(a.l.time));
   document.getElementById("recentLoads").innerHTML=items.slice(0,10).map(({w,l})=>`<div class="list-item"><div>${fmtTime(l.time)} · ${esc(l.name||"täpsustamata")} · ${loadCount(l)} k · <b>${num(l.tm)} tm</b> <span class="note">${esc(w.lank||"")}</span></div><button class="small-btn danger-text" onclick="deleteLoad('${w.id}','${l.id}')">✕</button></div>`).join("")||'<div class="note">Kandeid pole.</div>';
+  renderRecentEvents();
 }
 function tableHtml(head,rows,totalRow,clicks){
   return `<div class="table-wrap"><table><thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map((r,i)=>`<tr${clicks?` style="cursor:pointer" onclick="openDayDetail('${clicks[i]}')"`:""}>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}${totalRow?`<tr class="total">${totalRow.map(c=>`<td>${c}</td>`).join("")}</tr>`:""}</tbody></table></div>`;
 }
 function renderSummary(){
-  const p=document.getElementById("summaryPeriod").value,list=worksInPeriod(p),s=summarize(list);
+  const p=document.getElementById("summaryPeriod").value;document.getElementById("customRange").classList.toggle("hidden",p!=="custom");const list=worksInPeriod(p),s=summarize(list);
   const el=document.getElementById("summaryContent");
   if(!list.length){el.innerHTML='<div class="empty">Sellel perioodil pole töid.</div>';return}
-  const perH=s.hours>0?s.tm/s.hours:0;
+  const perH=s.hours>=0.25?s.tm/s.hours:0;
   let html=`<div class="stats">
     <div class="stat"><small>Veetud</small><strong>${num(s.tm)} tm</strong></div>
     <div class="stat"><small>Koormaid</small><strong>${s.loads}</strong></div>
@@ -896,6 +955,12 @@ function renderSummary(){
     <div class="stat"><small>tm tunnis</small><strong>${num(perH)}</strong></div>
     <div class="stat"><small>Tunnipalga järgi</small><strong>${money(s.payH)}</strong></div>
     <div class="stat"><small>tm-hinna järgi</small><strong>${money(s.payT)}</strong></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><small>⛽ Tankimisi</small><strong>${s.refuels}</strong></div>
+    <div class="stat"><small>Tankimine (l)</small><strong>${num(s.liters,1)}</strong></div>
+    <div class="stat"><small>📝 Märkmeid</small><strong>${s.noteCount}</strong></div>
+    <div class="stat"><small>Muid sündmusi</small><strong>${Object.keys(s.evc).filter(k=>!isFuel(k)).reduce((a,k)=>a+s.evc[k],0)}</strong></div>
   </div>`;
   const days=Object.values(s.byDay).sort((a,b)=>b.date.localeCompare(a.date));
   html+=`<div class="section-title"><h2>Päevade kaupa</h2></div><p class="note">Puuduta päeva, et avada selle koormad, masin ja kellaajad.</p>`+tableHtml(["Päev","Tunnid","Koormaid","tm","Tunni järgi","tm järgi"],days.map(d=>[fmtDateKey(d.date),fmtDuration(d.hours),d.loads,num(d.tm),money(d.payH),money(d.payT)]),["Kokku",fmtDuration(s.hours),s.loads,num(s.tm),money(s.payH),money(s.payT)],days.map(d=>d.date));
@@ -929,7 +994,7 @@ function renderSettings(){
   document.getElementById("setPayMode").value=s.payMode;
   document.getElementById("setHourly").value=s.hourlyRate||"";
   document.getElementById("setTmRate").value=s.tmRate||"";
-  document.getElementById("setNtfy").value=s.ntfyTopic||"";
+  document.getElementById("setNtfy").value=s.ntfyTopic||"";document.getElementById("setEventTypes").value=(s.eventTypes||[]).join(", ");applyTheme();
   const dc=deviceCfg();document.getElementById("setFbProject").value=dc.fbProject||"";document.getElementById("setFbKey").value=dc.fbKey||"";
   document.getElementById("setAiKey").value=dc.aiKey||"";document.getElementById("setAiModel").value=dc.aiModel||"";
   if(!syncBusy){const c=document.getElementById("cloudStatusText");if(c&&!c.textContent)c.textContent=cloudCfg()?"Valmis — logi sisse sama nime/salasõnaga teises seadmes.":"Pole seadistatud."}
@@ -1038,7 +1103,7 @@ function toolSetDiary(i){
 }
 function toolNavigate(i){const ok=["home","summary","diary","assortments","settings"];if(!ok.includes(i.page))return {error:"page: "+ok.join(", ")};showPage(i.page);return {ok:true}}
 function execTool(name,input){
-  try{const f={add_load:toolAddLoad,start_work:toolStartWork,finish_work:toolFinishWork,delete_load:toolDeleteLoad,set_setting:toolSetSetting,upsert_assortment:toolUpsertAssortment,get_summary:toolGetSummary,set_diary_field:toolSetDiary,navigate:toolNavigate}[name];
+  try{const f={add_load:toolAddLoad,start_work:toolStartWork,finish_work:toolFinishWork,delete_load:toolDeleteLoad,set_setting:toolSetSetting,upsert_assortment:toolUpsertAssortment,get_summary:toolGetSummary,set_diary_field:toolSetDiary,navigate:toolNavigate,add_event:toolAddEvent}[name];
     if(!f)return {error:"Tundmatu tööriist"};return f(input||{})}catch(e){return {error:String(e.message||e)}}
 }
 const AI_TOOLS=[
@@ -1050,6 +1115,7 @@ const AI_TOOLS=[
 {name:"upsert_assortment",description:"Lisa uus sortiment või muuda olemasolevat nime järgi.",input_schema:{type:"object",properties:{name:{type:"string"},species:{type:"string"},length:{type:"number"},coeff:{type:"number"},rate:{type:"number",description:"€/tm"}},required:["name"]}},
 {name:"get_summary",description:"Kokkuvõte perioodi kohta (tunnid, koormad, tm, raha).",input_schema:{type:"object",properties:{period:{type:"string",enum:["today","week","month","all"]}}}},
 {name:"set_diary_field",description:"Muuda praktikapäeviku teksti kuupäeval (YYYY-MM-DD). personal_note ainult kui kasutaja seda otseselt palub.",input_schema:{type:"object",properties:{date:{type:"string"},field:{type:"string",enum:["personal_note","activities_text"]},text:{type:"string"}},required:["date","field","text"]}},
+{name:"add_event",description:"Lisa aktiivsele tööle märge või sündmus (type: Märge, Tankimine, Määrimine, Hooldus/rike, Lintide paigaldus). liters valikuline tankimisel.",input_schema:{type:"object",properties:{type:{type:"string"},text:{type:"string"},liters:{type:"number"}},required:["type"]}},
 {name:"navigate",description:"Ava rakenduse leht.",input_schema:{type:"object",properties:{page:{type:"string",enum:["home","summary","diary","assortments","settings"]}},required:["page"]}}
 ];
 let chatHistory=[],chatBusy=false;
@@ -1064,10 +1130,13 @@ function toggleChat(){
 function localChat(text){
   const r=parseLoadText(text);
   if(!activeWork()){addMsg("bot","Töö pole alanud — alusta kõigepealt tööd langil (avalehel).");return}
+  const lt=text.trim(),low=lt.toLowerCase().replace(",",".");
+  if(/^(märge|märkus)\b/i.test(lt)){const res=execTool("add_event",{type:"Märge",text:lt.replace(/^(märge|märkus)\s*[:\-]?\s*/i,"")});addMsg("bot",res.error?"⚠️ "+res.error:"📝 Märge lisatud.");return}
+  if(/tankis|tankimi/.test(low)){const m=low.match(/(\d+(?:\.\d+)?)\s*(?:l\b|liitrit)/);const res=execTool("add_event",{type:FUEL,liters:m?parseFloat(m[1]):undefined});addMsg("bot",res.error?"⚠️ "+res.error:`⛽ Tankimine lisatud (kokku ${res.count_of_type}).`);return}
   if(r.tm>0||(r.fraction&&r.assortment)){
     const res=execTool("add_load",{assortment:r.assortment?r.assortment.name:undefined,count:r.count,tm:r.tm||undefined,fraction:r.fraction||undefined});
     addMsg("bot",res.error?("⚠️ "+res.error):`✓ Lisatud: ${res.added.assortment||"sortiment täpsustamata"} · ${res.added.count} k · ${num(res.added.tm)} tm. Langil kokku ${num(res.lank_total_tm)} tm.`+(r.ambiguous.length?" (Kontrolli sortimenti — oli mitu sarnast.)":""));
-  }else addMsg("bot","Ei saanud aru. Proovi: „3 koormat männipalk 45 tm” või „2 koormat kuusepaberipuit 3/4”. Muude asjade jaoks lisa Seadetes AI võti.");
+  }else addMsg("bot","Ei saanud aru. Proovi: „3 koormat männipalk 45 tm” või „2 koormat kuusepaberipuit 3/4”, „tankisin 40 l” või „märge: vihm”. Muude asjade jaoks lisa Seadetes AI võti.");
 }
 function aiSystem(){
   const w=activeWork(),t=summarize(worksInPeriod("today")),recent=[];
@@ -1076,7 +1145,7 @@ function aiSystem(){
   const ctx={now:new Date().toISOString(),today:todayKey(),active_work:w?{lank:w.lank,kvartal:w.kvartal,eraldis:w.eraldis,machine:w.machine,start:fmtTime(w.start)}:null,
     today_totals:{loads:t.loads,tm:Number(t.tm.toFixed(2)),hours:Number(t.hours.toFixed(2))},recent_loads:recent.slice(-8),
     assortments:state.assortments.map(a=>({name:a.name,species:a.species,length:a.length,coeff:a.coeff,rate:a.rate==null?null:a.rate})),
-    settings:{pay_mode:s.payMode,hourly_rate:s.hourlyRate,tm_rate:s.tmRate,idle_hours:s.idleHours,auto_end_hour:s.autoEndHour,cross_section_area:s.crossSectionArea},diary_dates:diaryDates().slice(0,10)};
+    settings:{pay_mode:s.payMode,hourly_rate:s.hourlyRate,tm_rate:s.tmRate,idle_hours:s.idleHours,auto_end_hour:s.autoEndHour,cross_section_area:s.crossSectionArea},diary_dates:diaryDates().slice(0,10),event_types:state.settings.eventTypes,today_refuels:t.refuels,today_refuel_liters:Number(t.liters.toFixed(1))};
   return "Sa oled Metsapraktika rakenduse abiline metsamasina operaatorile/praktikandile. Vasta eesti keeles, lühidalt ja otse. Rakenduse andmeid muudad ainult antud tööriistadega — ära väida, et midagi on tehtud, kui tööriist ei õnnestunud. Ära mõtle välja koguseid ega sortimente; kui info puudub, küsi. Isiklikku panust (praktikapäeviku refleksiooni) kirjuta ainult kui kasutaja seda otseselt palub, ja kasuta tema enda sõnu. Rakenduse koodi sa muuta ei saa. Praegune seis (JSON): "+JSON.stringify(ctx);
 }
 function trimHistory(){
@@ -1110,6 +1179,147 @@ async function sendChat(){
   finally{if(thinking)thinking.remove();chatBusy=false;document.getElementById("chatSend").disabled=false}
 }
 
+// ============ Märkmed ja sündmused ============
+function fuelCount(w){return(w.events||[]).filter(e=>isFuel(e.type)).length}
+function noteCountOf(w){return(w.events||[]).filter(e=>e.type==="Märge").length}
+function eventIcon(t){const k=String(t).toLowerCase();return k==="tankimine"?"⛽":k==="märge"?"📝":k.startsWith("määrimine")?"🛢":(k.includes("hooldus")||k.includes("rike"))?"🔧":k.includes("lint")?"⛓":"•"}
+function evLine(e){return `${fmtTime(e.time)} · ${eventIcon(e.type)} ${esc(e.type)}${e.liters?" "+num(e.liters,1)+" l":""}${e.text?" — "+esc(e.text):""}`}
+function eventsHtml(w){const ev=w.events||[];return ev.length?`<div style="margin-top:8px"><div class="note">Märkmed ja sündmused</div>${ev.map(e=>`<div class="list-item"><div>${evLine(e)}</div></div>`).join("")}</div>`:""}
+function renderRecentEvents(){
+  const el=document.getElementById("recentEvents");if(!el)return;
+  const items=[];worksInPeriod("today").forEach(w=>(w.events||[]).forEach(e=>items.push({w,e})));
+  items.sort((a,b)=>String(b.e.time).localeCompare(String(a.e.time)));
+  el.innerHTML=items.slice(0,15).map(({w,e})=>`<div class="list-item"><div>${evLine(e)} <span class="note">${esc(w.lank||"")}</span></div><div class="actions"><button class="small-btn" onclick="openEventModal(null,'${w.id}','${e.id}')">✎</button><button class="small-btn danger-text" onclick="deleteEvent('${w.id}','${e.id}')">✕</button></div></div>`).join("")||'<div class="note">Märkmeid ja sündmusi pole. Vajuta 📝 Märge või ⛽ Tankimine.</div>';
+}
+let evType="Märge",evEditing=null,evTypeList=[];
+function renderEvTypes(){
+  evTypeList=["Märge",...state.settings.eventTypes.filter(t=>t!=="Märge")];
+  document.getElementById("evTypes").innerHTML=evTypeList.map((t,i)=>`<span class="tag ${t===evType?"selected":""}" onclick="pickEvType(${i})">${eventIcon(t)} ${esc(t)}</span>`).join("");
+  document.getElementById("evLitersBox").classList.toggle("hidden",!isFuel(evType));
+}
+function pickEvType(i){evType=evTypeList[i];renderEvTypes()}
+function openEventModal(type,workId,eventId){
+  evEditing=null;let e=null;
+  if(workId&&eventId){const w=workById(workId);e=w&&(w.events||[]).find(x=>x.id===eventId);if(e)evEditing={workId,eventId}}
+  else if(!activeWork()){alert("Märget saab lisada töö käimise ajal — alusta kõigepealt tööd.");return}
+  evType=e?e.type:(type||"Märge");
+  document.getElementById("evText").value=e?(e.text||""):"";
+  document.getElementById("evLiters").value=(e&&e.liters)?e.liters:"";
+  renderEvTypes();openModal("eventModal");
+}
+function toolAddEvent(i){
+  const w=activeWork();if(!w)return {error:"Töö ei ole käimas."};
+  const type=String(i.type||"Märge"),text=String(i.text||"").trim();
+  if(type==="Märge"&&!text)return {error:"Märge on tühi."};
+  const now=new Date().toISOString(),l=Number(i.liters);
+  w.events=w.events||[];w.events.push({id:uid("e"),time:now,type,text,liters:l>0?l:null});
+  w.lastPing=now;idlePromptFor=null;saveLocal();renderAll();ntfyRescheduleIdle();
+  return {ok:true,type,count_of_type:w.events.filter(e=>e.type===type).length};
+}
+function saveEvent(){
+  const text=document.getElementById("evText").value.trim(),lit=Number(document.getElementById("evLiters").value);
+  if(evType==="Märge"&&!text){alert("Kirjuta märge.");return}
+  if(evEditing){
+    const w=workById(evEditing.workId),e=w&&(w.events||[]).find(x=>x.id===evEditing.eventId);
+    if(e){e.type=evType;e.text=text;e.liters=(isFuel(evType)&&lit>0)?lit:null;saveLocal()}
+    evEditing=null;closeModal("eventModal");renderAll();return;
+  }
+  const r=toolAddEvent({type:evType,text,liters:isFuel(evType)?lit:undefined});
+  if(r.error){alert(r.error);return}
+  closeModal("eventModal");showToast("✓ "+evType+" lisatud");
+}
+function quickFuel(){const r=toolAddEvent({type:FUEL});if(r.error){alert(r.error);return}showToast("⛽ Tankimine lisatud (kokku "+r.count_of_type+")")}
+function deleteEvent(workId,eventId){
+  const w=workById(workId);if(!w||!confirm("Kustutan selle kande?"))return;
+  w.events=(w.events||[]).filter(e=>e.id!==eventId);saveLocal();renderAll();
+}
+
+// ============ Kokkuvõte bossile ============
+const fmtN=v=>Number(v||0).toLocaleString("et-EE",{minimumFractionDigits:2,maximumFractionDigits:2});
+function reportOpts(){return {days:document.getElementById("repDays").checked,notes:document.getElementById("repNotes").checked,pay:document.getElementById("repPay").checked}}
+function reportBuild(){
+  const from=document.getElementById("repFrom").value,to=document.getElementById("repTo").value;
+  if(!from||!to||from>to)return null;
+  const list=state.works.filter(w=>w.date>=from&&w.date<=to).sort((a,b)=>String(a.start).localeCompare(String(b.start)));
+  const s=summarize(list),mm={};
+  list.forEach(w=>{const k=w.machine||"(masin määramata)";if(!mm[k])mm[k]={name:k,hours:0,loads:0,tm:0};const st=workStats(w);mm[k].hours+=workHours(w);mm[k].loads+=st.loads;mm[k].tm+=st.tm});
+  const notes=[];list.forEach(w=>(w.events||[]).forEach(e=>{if(e.text)notes.push({w,e})}));
+  notes.sort((a,b)=>String(a.e.time).localeCompare(String(b.e.time)));
+  return {from,to,list,s,machines:Object.values(mm),notes};
+}
+function evSummaryText(s){
+  const parts=[];if(s.refuels)parts.push(`Tankimisi: ${s.refuels}${s.liters?" ("+fmtN(s.liters)+" l)":""}`);
+  Object.keys(s.evc).filter(k=>!isFuel(k)).forEach(k=>parts.push(`${k}: ${s.evc[k]}×`));
+  return parts.join(" · ");
+}
+function reportHtml(r,o){
+  const s=r.s,perDay=s.days.size?s.tm/s.days.size:0,perH=s.hours>=0.25?s.tm/s.hours:0,ev=evSummaryText(s);
+  let h=`<h2>🌲 Töökokkuvõte</h2><p><b>${esc(state.user)}</b>${state.company?" · "+esc(state.company):""}<br>Periood: <b>${fmtDateKey(r.from)} – ${fmtDateKey(r.to)}</b></p>`;
+  h+=`<div class="stats"><div class="stat"><small>Veetud</small><strong>${fmtN(s.tm)} tm</strong></div><div class="stat"><small>Koormaid</small><strong>${s.loads}</strong></div><div class="stat"><small>Töötunde</small><strong>${fmtDuration(s.hours)}</strong></div><div class="stat"><small>Tööpäevi</small><strong>${s.days.size}</strong></div></div>`;
+  h+=`<p class="note">Keskmiselt ${perH?fmtN(perH)+" tm/h · ":""}${fmtN(perDay)} tm/päev${ev?" · "+esc(ev):""}</p>`;
+  if(o.pay)h+=`<p><b>Teenitud (hinnang):</b> ${money(s.main)} <span class="note">(tunni järgi ${money(s.payH)} · tm järgi ${money(s.payT)})</span></p>`;
+  h+=`<h3>Sortimendid</h3>`+tableHtml(["Sortiment","Koormaid","tm"],Object.values(s.byA).sort((a,b)=>b.tm-a.tm).map(a=>[esc(a.name),a.loads,fmtN(a.tm)]),["Kokku",s.loads,fmtN(s.tm)]);
+  h+=`<h3>Langid</h3>`+tableHtml(["Lank","Tunnid","Koormaid","tm"],Object.values(s.byLank).sort((a,b)=>b.tm-a.tm).map(l=>[esc(l.name),fmtDuration(l.hours),l.loads,fmtN(l.tm)]));
+  h+=`<h3>Masinad</h3>`+tableHtml(["Masin","Tunnid","Koormaid","tm"],r.machines.slice().sort((a,b)=>b.tm-a.tm).map(m=>[esc(m.name),fmtDuration(m.hours),m.loads,fmtN(m.tm)]));
+  if(o.days)h+=`<h3>Tööd</h3>`+tableHtml(["Päev","Kell","Lank","Masin","Koormaid","tm"],r.list.map(w=>{const st=workStats(w);return [fmtDateKey(w.date).slice(0,5),fmtTime(w.start)+"–"+(w.end?fmtTime(w.end):"…"),esc(w.lank||"—"),esc(w.machine||"—"),st.loads,fmtN(st.tm)]}));
+  if(o.notes&&r.notes.length)h+=`<h3>Märkused</h3>`+r.notes.map(({w,e})=>`<div class="list-item"><div>${fmtDateKey(w.date).slice(0,5)} ${evLine(e)} <span class="note">${esc(w.lank||"")}</span></div></div>`).join("");
+  return h;
+}
+function reportText(r,o){
+  const s=r.s,L=[],perDay=s.days.size?s.tm/s.days.size:0,perH=s.hours>=0.25?s.tm/s.hours:0,ev=evSummaryText(s);
+  L.push("🌲 TÖÖKOKKUVÕTE",`Töötaja: ${state.user}`);if(state.company)L.push(`Ettevõte: ${state.company}`);
+  L.push(`Periood: ${fmtDateKey(r.from)} – ${fmtDateKey(r.to)}`,"","KOKKU",`Tööpäevi: ${s.days.size}`,`Töötunde: ${fmtDuration(s.hours)}`,`Koormaid: ${s.loads}`,`Veetud: ${fmtN(s.tm)} tm`,`Keskmiselt: ${perH?fmtN(perH)+" tm/h · ":""}${fmtN(perDay)} tm/päev`);
+  if(ev)L.push(ev);
+  if(o.pay)L.push(`Teenitud (hinnang): ${money(s.main)} (tunni järgi ${money(s.payH)}, tm järgi ${money(s.payT)})`);
+  L.push("","SORTIMENDID");Object.values(s.byA).sort((a,b)=>b.tm-a.tm).forEach(a=>L.push(`• ${a.name} — ${fmtN(a.tm)} tm (${a.loads} koormat)`));
+  L.push("","LANGID");Object.values(s.byLank).sort((a,b)=>b.tm-a.tm).forEach(l=>L.push(`• ${l.name} — ${fmtN(l.tm)} tm · ${l.loads} koormat · ${fmtDuration(l.hours)} h`));
+  L.push("","MASINAD");r.machines.slice().sort((a,b)=>b.tm-a.tm).forEach(m=>L.push(`• ${m.name} — ${fmtN(m.tm)} tm · ${m.loads} koormat · ${fmtDuration(m.hours)} h`));
+  if(o.days){L.push("","TÖÖD");r.list.forEach(w=>{const st=workStats(w);L.push(`${fmtDateKey(w.date).slice(0,5)} ${fmtTime(w.start)}–${w.end?fmtTime(w.end):"…"} · lank ${w.lank||"—"} · ${w.machine||"—"} · ${st.loads} k · ${fmtN(st.tm)} tm`)})}
+  if(o.notes&&r.notes.length){L.push("","MÄRKUSED");r.notes.forEach(({w,e})=>L.push(`${fmtDateKey(w.date).slice(0,5)} ${fmtTime(e.time)} · ${e.type}${e.liters?" "+fmtN(e.liters)+" l":""}: ${e.text}${w.lank?" (lank "+w.lank+")":""}`))}
+  return L.join("\n");
+}
+function renderReport(){
+  const r=reportBuild(),el=document.getElementById("repPreview");
+  if(!r){el.innerHTML='<div class="empty">Vali kuupäevad.</div>';return}
+  el.innerHTML=r.list.length?reportHtml(r,reportOpts()):'<div class="empty">Sellel perioodil pole töid.</div>';
+}
+function openReport(){
+  let [a,b]=periodBounds(document.getElementById("summaryPeriod").value);
+  if(a<"2000"){const ds=state.works.map(w=>w.date).sort();a=ds[0]||todayKey();b=todayKey()}
+  document.getElementById("repFrom").value=a;document.getElementById("repTo").value=b;renderReport();openModal("reportModal");
+}
+function setReportPreset(p){const [a,b]=periodBounds(p);document.getElementById("repFrom").value=a;document.getElementById("repTo").value=b;renderReport()}
+function currentReportText(){const r=reportBuild();if(!r||!r.list.length){showToast("Sellel perioodil pole töid");return null}return reportText(r,reportOpts())}
+async function copyReport(){
+  const t=currentReportText();if(!t)return;
+  try{await navigator.clipboard.writeText(t)}catch(e){const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy")}catch(e2){}ta.remove()}
+  showToast("Kokkuvõte kopeeritud — kleebi sõnumisse või e-kirja");
+}
+async function shareReport(){
+  const t=currentReportText();if(!t)return;
+  if(navigator.share){try{await navigator.share({title:"Töökokkuvõte",text:t});return}catch(e){if(e&&e.name==="AbortError")return}}
+  copyReport();
+}
+function printReport(){
+  const r=reportBuild();if(!r||!r.list.length){showToast("Sellel perioodil pole töid");return}
+  document.getElementById("printArea").innerHTML=reportHtml(r,reportOpts());window.print();
+}
+function csvCell(v){return '"'+String(v==null?"":v).replace(/"/g,'""')+'"'}
+function csvReport(kind){
+  const r=reportBuild();if(!r||!r.list.length){showToast("Sellel perioodil pole töid");return}
+  const rows=[],n2=v=>Number(v).toFixed(2).replace(".",",");
+  if(kind==="works"){
+    rows.push(["Kuupäev","Algus","Lõpp","Tunnid","Lank","Kvartal","Eraldis","Ettevõte","Masin","Töö liik","Koormaid","tm","Tankimisi","Tankimine (l)","Märkused"]);
+    r.list.forEach(w=>{const st=workStats(w),ev=w.events||[],fu=ev.filter(e=>isFuel(e.type));
+      rows.push([fmtDateKey(w.date),fmtTime(w.start),w.end?fmtTime(w.end):"",n2(workHours(w)),w.lank,w.kvartal,w.eraldis,w.company,w.machine,w.workType,st.loads,n2(st.tm),fu.length,n2(fu.reduce((a,e)=>a+(Number(e.liters)||0),0)),ev.filter(e=>e.text).map(e=>e.text).join(" | ")])});
+  }else{
+    rows.push(["Kuupäev","Kell","Lank","Masin","Sortiment","Koormaid","tm"]);
+    r.list.forEach(w=>w.loads.forEach(l=>rows.push([fmtDateKey(w.date),fmtTime(l.time),w.lank,w.machine,l.name||"täpsustamata",loadCount(l),n2(l.tm)])));
+  }
+  const csv="\uFEFF"+rows.map(row=>row.map(csvCell).join(";")).join("\r\n");
+  downloadBlob(new Blob([csv],{type:"text/csv;charset=utf-8"}),`kokkuvote-${kind==="works"?"tood":"koormad"}-${r.from}_${r.to}.csv`);
+}
+
 // ============ Päeva ülevaade ============
 function openDayDetail(date){
   const ws=worksOn(date),body=document.getElementById("dayBody");
@@ -1124,7 +1334,7 @@ function openDayDetail(date){
       <div style="margin:6px 0">🚜 <b>${esc(w.machine||"masin määramata")}</b> · ${esc(w.workType||"")}</div>
       <div class="note">🕐 ${fmtTime(w.start)}–${w.end?fmtTime(w.end):"käib"} (${fmtDuration(workHours(w))} h) · ${st.loads} koormat · ${num(st.tm)} tm</div>
       ${tableHtml(["Sortiment","Koormaid","tm"],Object.values(st.by).map(a=>[esc(a.name),a.loads,num(a.tm)]))}
-      ${w.loads.map(l=>`<div class="list-item"><div>${fmtTime(l.time)} · ${esc(l.name||"täpsustamata")} · ${loadCount(l)} k</div><b>${num(l.tm)} tm</b></div>`).join("")||'<div class="note">Koormaid pole.</div>'}</div>`;
+      ${w.loads.map(l=>`<div class="list-item"><div>${fmtTime(l.time)} · ${esc(l.name||"täpsustamata")} · ${loadCount(l)} k</div><b>${num(l.tm)} tm</b></div>`).join("")||'<div class="note">Koormaid pole.</div>'}${eventsHtml(w)}</div>`;
   });
   body.innerHTML=html;
   document.getElementById("dayDiaryBtn").onclick=()=>{closeModal("dayModal");openDiaryPreview(date)};
@@ -1251,6 +1461,11 @@ function init(){
   document.getElementById("logoutBtn").onclick=()=>{localStorage.removeItem(LAST_USER_KEY);localStorage.removeItem(LAST_PIN_KEY);location.reload()};
   document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>showPage(b.dataset.page));
   document.getElementById("summaryPeriod").addEventListener("change",renderSummary);
+  {const k=todayKey();document.getElementById("rangeFrom").value=k.slice(0,8)+"01";document.getElementById("rangeTo").value=k;}
+  ["rangeFrom","rangeTo"].forEach(id=>document.getElementById(id).addEventListener("change",renderSummary));
+  ["repFrom","repTo","repDays","repNotes","repPay"].forEach(id=>document.getElementById(id).addEventListener("change",renderReport));
+  applyTheme();if(window.matchMedia)try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",applyTheme)}catch(e){}
+  document.getElementById("setTheme").addEventListener("change",e=>setTheme(e.target.value));
   document.querySelectorAll(".fraction").forEach(b=>b.addEventListener("click",()=>{pickedFraction=Number(b.dataset.fraction);document.querySelectorAll(".fraction").forEach(x=>x.classList.toggle("selected",x===b));recalcLoad()}));
   document.querySelectorAll("#laTabs .tab").forEach(t=>t.addEventListener("click",()=>{pickedMode=t.dataset.mode;applyMode()}));
   ["laLength","laCount","laManualTm"].forEach(id=>document.getElementById(id).addEventListener("input",recalcLoad));
@@ -1262,6 +1477,7 @@ function init(){
   bindSetting("setHourly",v=>state.settings.hourlyRate=numOr(v,0));
   bindSetting("setTmRate",v=>state.settings.tmRate=numOr(v,0));
   bindSetting("setNtfy",v=>state.settings.ntfyTopic=v.trim());
+  bindSetting("setEventTypes",v=>{const a=v.split(",").map(x=>x.trim()).filter(Boolean);state.settings.eventTypes=a.length?a:[...DEFAULT_EVENT_TYPES]});
   const devBind=(id,key,after)=>document.getElementById(id).addEventListener("change",e=>{setDeviceCfg({[key]:e.target.value.trim()});if(after)after();renderSettings()});
   devBind("setFbProject","fbProject",()=>{setSyncStatus("off");syncNow(true)});devBind("setFbKey","fbKey",()=>{setSyncStatus("off");syncNow(true)});
   devBind("setAiKey","aiKey");devBind("setAiModel","aiModel");

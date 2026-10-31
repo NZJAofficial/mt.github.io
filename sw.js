@@ -1,4 +1,4 @@
-const CACHE = "metsapraktika-v4";
+const CACHE = "metsapraktika-v5";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", (e) => {
